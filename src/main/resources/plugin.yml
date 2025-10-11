@@ -1,0 +1,4 @@
+name: BloodOnTheBlocktower
+version: 1.25.5-sp-alpha
+main: io.github.tony12684.BotB.Main
+api-version: 1.21.5

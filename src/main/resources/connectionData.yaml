@@ -1,0 +1,10 @@
+url: "jdbc:mysql://SHELTERBOTCT.serverminer.com:16561/smpicnic"
+port: 16561
+username: "smpicnic"
+password: "68e0860bb04e0"
+database:
+  host: SHELTERBOTCT.serverminer.com
+  port: 16561
+  database: smpicnic
+  user: smpicnic
+  password: 68e0860bb04e0

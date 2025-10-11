@@ -1,0 +1,2 @@
+worldName: "werewolf"
+voiceBlockDistance: 1.0 # Distance offset to check block under player for voice channel changing
