@@ -88,13 +88,15 @@ public class Main extends JavaPlugin implements Listener {
 
     @EventHandler
     public void asyncPlayerChat(AsyncPlayerChatEvent event) {
-        // TODO: make it so that players who are in a voice chat only message those people
         //triggered when a player sends a chat message
+        // TODO: make it so that players who are in a voice chat only message those people
+        // TODO: wiretap all player messages to storyteller?
+        // TODO move this start game trigger to player command preprocess event and build game start command
+
         if (debugMode) {getLogger().info("Async player chat event for : " + event.getPlayer().getDisplayName());}
         if (event.getMessage() != null && event.getMessage().startsWith("BOTBSTART")) {
             nightTime();
         }
-        
     }
 
     @EventHandler

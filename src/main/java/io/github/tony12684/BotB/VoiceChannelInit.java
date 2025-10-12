@@ -29,8 +29,6 @@ public class VoiceChannelInit {
             if (channel != null && voiceApi.getChannel(channel) == null && voiceApi.isChannelNameValid(channel)) {
                 Bukkit.getLogger().info("Creating voice channel: " + channel);
                 voiceApi.createChannel(channel, client, false, null);
-                //TODO manifest channels as hidden
-                //TODO fix init, this puts the creator in every channel
             } else {
                 System.out.println("Invalid voice channel for: " + entry.getValue());
             }

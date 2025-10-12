@@ -1,3 +1,4 @@
+-- TODO comment out useful information
 CREATE TABLE `users` (
   `uuid` char(32) PRIMARY KEY,
   `username` varchar(16) NOT NULL,
