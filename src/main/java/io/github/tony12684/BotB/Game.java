@@ -38,6 +38,7 @@ public class Game extends JavaPlugin {
             players.add(new PlayerPerformer(uuid, null)); // Role to be assigned later
         }
 
+        //TODO probably move all this to Game.startGame()
         assignSeats(players);
 
         List<Role> roleList = getRoleList();
@@ -153,6 +154,9 @@ public class Game extends JavaPlugin {
         for (PlayerPerformer player : players) {
             Player bukkitPlayer = Bukkit.getPlayer(player.getUUID());
             if (bukkitPlayer != null && bukkitPlayer.isOnline()) {
+                if (player.getRole().getFalseRole() != null) {
+                    StringBuilder message = new StringBuilder(ChatColor.GRAY + "You are the " + player.getRole().getFalseRole() + ".\n");
+                }
                 StringBuilder message = new StringBuilder(ChatColor.GRAY + "You are the " + player.getRole().getRoleName() + ".\n");
                 message.append("Your team is: ").append(player.getRole().getTeam()).append("\n");
                 message.append(player.getRole().getStartingMessage());

@@ -8,6 +8,9 @@ public class Role {
     private boolean allNight; // indicates if the role has actions every night
     private int actionPriority; // Priority of the role's action during the night phase (lower number = higher priority)
     private boolean specialSetup = false; // Indicates if the role requires special setup
+    private String falseRole; // A false role to display to the player instead of their actual role
+    private String falseStartingMessage; // A false starting message to display to the player instead of their actual starting message
+    private String falseTeam; // A false team to display to the player instead of their actual team
 
     public Role(String roleName, String team, boolean firstNight, boolean allNight) {
         // Constructor for Role class
@@ -28,11 +31,11 @@ public class Role {
     public String getStartingMessage() {
         return startingMessage;
     }
-
+    
     public String getRoleName() {
         return roleName;
     }
-    
+
     public void setRoleName(String roleName) {
         this.roleName = roleName;
     }
@@ -43,6 +46,25 @@ public class Role {
 
     public void setTeam(String team) {
         this.team = team;
+    }
+
+    public String getFalseRole() {
+        return falseRole;
+    }
+    public void setFalseRole(String falseRole) {
+        this.falseRole = falseRole;
+    }
+    public String getFalseStartingMessage() {
+        return falseStartingMessage;
+    }
+    public void setFalseStartingMessage(String falseStartingMessage) {
+        this.falseStartingMessage = falseStartingMessage;
+    }
+    public String getFalseTeam() {
+        return falseTeam;
+    }
+    public void setFalseTeam(String falseTeam) {
+        this.falseTeam = falseTeam;
     }
 
     public boolean getSpecialSetup() {
