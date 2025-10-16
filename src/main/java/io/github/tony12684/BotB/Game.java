@@ -9,6 +9,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.google.protobuf.Message;
+
 import net.md_5.bungee.api.ChatColor;
 
 
@@ -31,7 +33,7 @@ public class Game extends JavaPlugin {
         this.gameState = "setup";
         this.dayCount = 0;
 
-        this.storyteller = new StorytellerPerformer(storytellerUUID, new Role("Storyteller", "Storyteller", false, false));
+        this.storyteller = new StorytellerPerformer(storytellerUUID, new Role("Storyteller", "Storyteller"));
         this.grimoire = new Grimoire(storytellerUUID);
 
         for (String uuid : playerUUIDs) {
@@ -52,6 +54,17 @@ public class Game extends JavaPlugin {
 
     private String getTime() {
         return java.time.LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME);
+    }
+
+    public List<PlayerPerformer> getPlayers() {
+        return players;
+    }
+    public List<PlayerPerformer> copyPlayers() {
+        List<PlayerPerformer> copy = new ArrayList<>();
+        for (PlayerPerformer player : players) {
+            copy.add(player);
+        }
+        return copy;
     }
 
     private void sortPlayersByActionPriority(List<PlayerPerformer> players) {
@@ -93,10 +106,7 @@ public class Game extends JavaPlugin {
         if (!roleList.isEmpty()) {crashGame("Unassigned roles remain!", storytellerUUID);}
         // TODO validate with storyteller
         for (PlayerPerformer player : players) {
-            if (player.getRole().getSpecialSetup()) {
-                // Perform special setup for roles that require it
-                //TODO implement special setup logic
-            }
+            player.getRole().setup();
         }
         updateGrimoire(players, storytellerUUID);
     }
@@ -141,8 +151,11 @@ public class Game extends JavaPlugin {
         demonInfo(demon, minions, bluffs);
         sortPlayersByActionPriority(players);
         for (PlayerPerformer player : players) {
-            if (player.getRole().getFirstNight()) {
-                player.getRole().firstNightAction();
+            if (player.isDrunk() || player.isPoisoned()) {
+                //TODO implement drunk and poisoned logic
+            } else {
+                //TODO build action object that 
+                player.getRole().firstNightAction(this);
             }
         }
     }
@@ -154,12 +167,16 @@ public class Game extends JavaPlugin {
         for (PlayerPerformer player : players) {
             Player bukkitPlayer = Bukkit.getPlayer(player.getUUID());
             if (bukkitPlayer != null && bukkitPlayer.isOnline()) {
-                if (player.getRole().getFalseRole() != null) {
-                    StringBuilder message = new StringBuilder(ChatColor.GRAY + "You are the " + player.getRole().getFalseRole() + ".\n");
+                StringBuilder message;
+                if (player.getRole().getFalseRole() != null) { // If the role has a false role, show that instead
+                    message = new StringBuilder(ChatColor.GRAY + "You are the " + player.getRole().getFalseRole().getRoleName() + ".\n");
+                    message.append("Your team is: ").append(player.getRole().getFalseRole().getTeam()).append("\n");
+                    message.append(player.getRole().getFalseRole().getStartingMessage());
+                } else {
+                    message = new StringBuilder(ChatColor.GRAY + "You are the " + player.getRole().getRoleName() + ".\n");
+                    message.append("Your team is: ").append(player.getRole().getTeam()).append("\n");
+                    message.append(player.getRole().getStartingMessage());
                 }
-                StringBuilder message = new StringBuilder(ChatColor.GRAY + "You are the " + player.getRole().getRoleName() + ".\n");
-                message.append("Your team is: ").append(player.getRole().getTeam()).append("\n");
-                message.append(player.getRole().getStartingMessage());
                 bukkitPlayer.sendMessage(message.toString());
             } else {
                 crashGame("Player not found or offline in Game.notifyPlayersOfRoles(): " + player.getUUID(), storyteller.getUUID());

@@ -1,6 +1,6 @@
 package io.github.tony12684.BotB;
 
-public class PlayerPerformer extends Performer {
+public class PlayerPerformer extends Performer{
     private boolean drunk = false; // Indicates if the player is drunk
     private boolean poisoned = false; // Indicates if the player is poisoned
     private int seat; // Player's seat number

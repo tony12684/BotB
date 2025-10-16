@@ -4,27 +4,18 @@ public class Role {
     private String roleName; // Name of the role
     private String team; // Default team affiliation
     private String startingMessage = "Have fun!"; // Message sent to player when assigned this role
-    private boolean firstNight; // Indicates if the role has a first night action
-    private boolean allNight; // indicates if the role has actions every night
     private int actionPriority; // Priority of the role's action during the night phase (lower number = higher priority)
-    private boolean specialSetup = false; // Indicates if the role requires special setup
-    private String falseRole; // A false role to display to the player instead of their actual role
-    private String falseStartingMessage; // A false starting message to display to the player instead of their actual starting message
-    private String falseTeam; // A false team to display to the player instead of their actual team
+    private Role falseRole; // A false role to display to the player instead of their actual role
 
-    public Role(String roleName, String team, boolean firstNight, boolean allNight) {
+    public Role(String roleName, String team) {
         // Constructor for Role class
         this.roleName = roleName;
         this.team = team;
-        this.firstNight = firstNight;
-        this.allNight = allNight;
     }
-    public Role(String roleName, String team, boolean firstNight, String startingMessage, boolean allNight) {
+    public Role(String roleName, String team, String startingMessage) {
         // Constructor for Role class with starting message
         this.roleName = roleName;
         this.team = team;
-        this.firstNight = firstNight;
-        this.allNight = allNight;
         this.startingMessage = startingMessage;
     }
 
@@ -48,45 +39,31 @@ public class Role {
         this.team = team;
     }
 
-    public String getFalseRole() {
+    public Role getFalseRole() {
         return falseRole;
     }
-    public void setFalseRole(String falseRole) {
+    public void setFalseRole(Role falseRole) {
         this.falseRole = falseRole;
     }
-    public String getFalseStartingMessage() {
-        return falseStartingMessage;
-    }
-    public void setFalseStartingMessage(String falseStartingMessage) {
-        this.falseStartingMessage = falseStartingMessage;
-    }
-    public String getFalseTeam() {
-        return falseTeam;
-    }
-    public void setFalseTeam(String falseTeam) {
-        this.falseTeam = falseTeam;
+
+    public boolean setup(Game game) {
+        // Default implementation does nothing
+        // Override this method in subclasses for specific setup logic
+        // return true if setup was performed successfully, false otherwise
+        return false;
     }
 
-    public boolean getSpecialSetup() {
-        return specialSetup;
-    }
-
-    public void setSpecialSetup(boolean specialSetup) {
-        this.specialSetup = specialSetup;
-    }
-
-    public boolean getFirstNight() {
-        return firstNight;
-    }
-
-    public boolean getAllNight() {
-        return allNight;
-    }
-
-    public boolean firstNightAction() {
+    public boolean firstNightAction(Game game) {
         // Default implementation does nothing
         // Override this method in subclasses for specific first night actions
-        // return true if action was successful, false otherwise
+        // return true if action was performed successfully, false otherwise
+        return false;
+    }
+
+    public boolean otherNightAction(Game game){
+        // Default implementation does nothing
+        // Override this method in subclasses for specific other night actions
+        // return true if action was performed successfully, false otherwise
         return false;
     }
 
