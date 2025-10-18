@@ -9,9 +9,9 @@ import com.craftmend.openaudiomc.api.clients.Client;
 
 public class VoiceChannelInit {
     public VoiceChannelInit(ChannelManager channelManager, Client client) {
-        initializeVoiceChatSettings(channelManager, client);
+        //initializeVoiceChatSettings(channelManager, client);
     }
-    
+    /*
     private void initializeVoiceChatSettings(ChannelManager channelManager, Client client) {
         Map<String, String> channels = channelManager.getAllChannels();
         VoiceApi voiceApi = VoiceApi.getInstance();
@@ -33,6 +33,6 @@ public class VoiceChannelInit {
                 System.out.println("Invalid voice channel for: " + entry.getValue());
             }
         }
-        */
     }
+    */
 }
