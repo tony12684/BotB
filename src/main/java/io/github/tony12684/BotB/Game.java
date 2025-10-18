@@ -57,9 +57,7 @@ public class Game extends JavaPlugin {
     }
 
     public List<PlayerPerformer> getPlayers() {
-        return players;
-    }
-    public List<PlayerPerformer> copyPlayers() {
+        // Return a copy of the players list to prevent external modification
         List<PlayerPerformer> copy = new ArrayList<>();
         for (PlayerPerformer player : players) {
             copy.add(player);
@@ -67,9 +65,30 @@ public class Game extends JavaPlugin {
         return copy;
     }
 
+    public PlayerPerformer getPlayerByRole(String roleName) {
+        for (PlayerPerformer player : players) {
+            if (player.getRole().getRoleName().equals(roleName)) {
+                return player;
+            }
+        }
+        return null; // Player with specified role not found
+    }
+
+    public StorytellerPerformer getStoryteller() {
+        // Return a copy of the storyteller performer to prevent external modification
+        StorytellerPerformer storyteller = new StorytellerPerformer(this.storyteller.getUUID(), this.storyteller.getRole());
+        return storyteller;
+    }
+
     private void sortPlayersByActionPriority(List<PlayerPerformer> players) {
         // Sort players based on their role's action priority for nighttime actions
         //TODO implement this
+    }
+
+    public List<PlayerPerformer> sortPlayersBySeatOrder(List<PlayerPerformer> players) {
+        List<PlayerPerformer> sortedPlayers = new ArrayList<>(players);
+        sortedPlayers.sort((p1, p2) -> Integer.compare(p1.getSeat(), p2.getSeat()));
+        return sortedPlayers;
     }
 
     private void assignSeats(List<PlayerPerformer> players) {
@@ -106,7 +125,7 @@ public class Game extends JavaPlugin {
         if (!roleList.isEmpty()) {crashGame("Unassigned roles remain!", storytellerUUID);}
         // TODO validate with storyteller
         for (PlayerPerformer player : players) {
-            player.getRole().setup();
+            player.getRole().setup(this);
         }
         updateGrimoire(players, storytellerUUID);
     }
@@ -154,8 +173,12 @@ public class Game extends JavaPlugin {
             if (player.isDrunk() || player.isPoisoned()) {
                 //TODO implement drunk and poisoned logic
             } else {
-                //TODO build action object that 
-                player.getRole().firstNightAction(this);
+                try {
+                    player.getRole().firstNightAction(this);
+                } catch (Exception e) {
+                    // Catch any exceptions thrown during the first night action
+                    crashGame("Error during first night action for player " + player.getUUID() + ": " + e.getMessage(), storyteller.getUUID());
+                }
             }
         }
     }
@@ -245,9 +268,10 @@ public class Game extends JavaPlugin {
         //TODO build this
     }
 
-    private void crashGame(String reason, String storytellerUUID) {
+    public void crashGame(String reason, String storytellerUUID) {
         // Handle game crash scenario
-        // TODO build this
+        // TODO build a proper crash handler that effects game state without server reboot
+        // TODO handle exceptions to try to keep the game running if possible
         getLogger().warning("Game crashed: " + reason);
         Bukkit.getPlayer(storytellerUUID).sendMessage(ChatColor.RED + reason);
     }

@@ -2,6 +2,9 @@ package io.github.tony12684.BotB.Roles;
 
 import java.util.List;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
 import io.github.tony12684.BotB.PlayerPerformer;
 import io.github.tony12684.BotB.Role;
 import io.github.tony12684.BotB.Game;
@@ -14,6 +17,8 @@ import io.github.tony12684.BotB.Game;
  * No other night action.
  */
 
+
+ //TODO implement action logging via SQL
 public class Chef extends Role {
     public Chef() {
         super("Chef", "Townsfolk");
@@ -21,27 +26,42 @@ public class Chef extends Role {
     
     @Override
     public boolean firstNightAction(Game game) {
-        List<PlayerPerformer> players = game.getPlayers();
-        PlayerPerformer chef = findChef(players);
-        Integer evilPairs = countEvilPairs(game);
-        return false;
-    }
-    private PlayerPerformer findChef(List<PlayerPerformer> players) {
-        for (PlayerPerformer player : players) {
-            if (player.getRole().getRoleName().equals("Chef")) {
-                return player;
-            }
+        PlayerPerformer chef = game.getPlayerByRole("Chef");
+        if (chef == null) {
+            throw new IllegalStateException("Chef player not found in game during first night action.");
         }
-        // TODO: move this to game object as a universal function
-        // TODO: throw error if chef not found
-        return null; // Chef not found
+        try {
+            Integer evilPairs = countEvilPairs(game);
+            Player chefPlayer = Bukkit.getPlayer(chef.getUUID());
+            chefPlayer.sendMessage("There are " + evilPairs + " pairs of evil players sitting next to each other.");
+            return true;
+        } catch (Exception e) {
+            throw e; // rethrow after logging
+        }
     }
+
     private Integer countEvilPairs(Game game) {
+        // for each sequential pair of players in seating order, check if both are evil
         PlayerPerformer lastPlayer = null;
         int evilPairs = 0;
-        List<PlayerPerformer> sortedPlayers = game.copyPlayers();
-        sortedPlayers.sort((p1, p2) -> Integer.compare(p1.getSeat(), p2.getSeat()));
-        // TODO: implement counting logic
+        List<PlayerPerformer> sortedPlayers = game.getPlayers();
+        sortedPlayers = game.sortPlayersBySeatOrder(sortedPlayers);
+        for (PlayerPerformer player : sortedPlayers) {
+            if (lastPlayer != null) {
+                if ((lastPlayer.getRole().getTeam().equals("Minion") || lastPlayer.getRole().getTeam().equals("Demon"))
+                && (player.getRole().getTeam().equals("Minion") || player.getRole().getTeam().equals("Demon"))) {
+                    evilPairs++;
+                }
+            }
+            lastPlayer = player;
+        }
+        if (lastPlayer == null) {
+            throw new IllegalStateException("Unexpected Null Player in Chef.countEvilPairs()");
+        }
+        if ((sortedPlayers.getFirst().getRole().getTeam().equals("Minion") || sortedPlayers.getFirst().getRole().getTeam().equals("Demon"))
+        && (lastPlayer.getRole().getTeam().equals("Minion") || lastPlayer.getRole().getTeam().equals("Demon"))) {
+            evilPairs++;
+        }
         return evilPairs;
     }
 }
