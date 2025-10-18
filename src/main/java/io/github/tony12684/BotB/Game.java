@@ -9,16 +9,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.google.protobuf.Message;
-
 import net.md_5.bungee.api.ChatColor;
 
-
-
-/*
- * This class is a placeholder for future game logic and management.
- */
 public class Game extends JavaPlugin {
+    // Game class to manage the state and logic of a Blood on the Blocktower game
     private String startTime; // ISO-8601 format yyyy-MM-ddTHH:mm:ss
     private String gameState;// e.g. "setup", "daytime", "voting", "nighttime", "ended"
     private int dayCount; // Tracks what day it is in the game
@@ -28,7 +22,7 @@ public class Game extends JavaPlugin {
     private List<Role> publicRoles; // List of Role objects for available "bluff" roles
     
     public Game(String storytellerUUID, List<String> playerUUIDs) {
-        // Constructor for Game class
+        //Constructor for Game class
         this.startTime = getTime();
         this.gameState = "setup";
         this.dayCount = 0;
@@ -49,10 +43,17 @@ public class Game extends JavaPlugin {
         //TODO log game starttime and player info to DB
 
         firstNight(players); // Proceed to the first night phase
+        //TODO build daytime, voting and subsequent night phases loop
     }
 
+    private int saveGameStart() {
+        //Add a new game entry to the database and return the game ID
+        
+        return 0;
+    }
 
     private String getTime() {
+        // Return the current time in ISO-8601 format
         return java.time.LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME);
     }
 
