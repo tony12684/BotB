@@ -1,6 +1,7 @@
 package io.github.tony12684.BotB;
 
 public class Database {
+    //handles database configuration
     private String host;
     private int port;
     private String database;
