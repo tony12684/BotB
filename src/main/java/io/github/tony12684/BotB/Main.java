@@ -1,5 +1,7 @@
 package io.github.tony12684.BotB;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.bukkit.*;
@@ -60,7 +62,9 @@ public class Main extends JavaPlugin implements Listener {
         //database initialization
         try {
         dataSource = initMySQLDataSource();
-        initializeDatabase();
+        initDatabase();
+        initRolesInDB();
+        initTeamsInDB();
         } catch (Exception e) {
             getLogger().severe("Failed to initialize Database");
         }
@@ -320,7 +324,7 @@ public class Main extends JavaPlugin implements Listener {
     }
     */
 
-    private boolean initializeDatabase() throws SQLException, IOException{
+    private boolean initDatabase() throws SQLException, IOException{
         //build database tables if they do not exist
         //TODO implement database table building
         String setup;
@@ -353,10 +357,55 @@ public class Main extends JavaPlugin implements Listener {
         return true;
     }
 
+    public boolean initRolesInDB() {
+        //load roles from yaml and insert them into the database
+        Yaml yaml = new Yaml();
+        try (InputStream in = Main.class.getResourceAsStream("/role_ids.yaml")) {
+            if (in == null) {
+                getLogger().severe("role_ids.yaml not found");
+                return false;
+            }
+            Map<?,?> roles = yaml.loadAs(in, Map.class);
+            for (Map.Entry<?,?> entry : roles.entrySet()) {
+                String roleName = entry.getValue().toString();
+                try (Connection conn = getConn();
+                     PreparedStatement stmt = conn.prepareStatement(
+                         "INSERT INTO roles (role_name) VALUES (?) ON DUPLICATE KEY UPDATE role_name = role_name")) {
+                    stmt.setString(1, roleName);
+                    stmt.executeUpdate();
+                } catch (SQLException e) {
+                    //TODO validate table and rebuild if needed
+                    getLogger().severe("Database insertion error for role: " + roleName);
+                    getLogger().severe("Error details: " + e.getMessage());
+                    return false;
+                }
+            }
+        } catch (Exception e) {
+            getLogger().severe("Failed to load role IDs from YAML: " + e.getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    public boolean initTeamsInDB() {
+        //put team names into teams reference table
+        try (Connection conn = getConn();
+            PreparedStatement stmt = conn.prepareStatement(
+                "INSERT INTO teams (team_name) VALUES (?) ON DUPLICATE KEY UPDATE team_name = team_name")) {
+            String[] teams = {"Townsfolk", "Outsiders", "Minions", "Demons"};
+            for (String teamName : teams) {
+                stmt.setString(1, teamName);
+                stmt.executeUpdate();
+            }
+        } catch (Exception e) {
+            getLogger().severe("Failed to initialize teams in database: " + e.getMessage());
+            return false;
+        }
+        return true;
+    }
+
     public int insertGameStartToDB() {
         // Initialize a new game into the database
-        // takes start time as ISO-8601 string (yyyy-MM-ddTHH:mm:ss)
-        // try with resources to auto close connections
         try (Connection conn = getConn();
             PreparedStatement stmt = conn.prepareStatement("INSERT INTO games (game_start_date_time) VALUES (NOW())")) {
             int gameId = stmt.executeUpdate();
@@ -364,6 +413,43 @@ public class Main extends JavaPlugin implements Listener {
         } catch (Exception e) {
             throw new RuntimeException("Database insertion error in insertGameStartToDB(): " + e.getMessage());
         }
+    }
+
+
+    public int insertNewUser(String playerUUID, String playerName) {
+        // Insert a new user into the database
+        // TODO fire this code on user join
+        try (Connection conn = getConn();
+            PreparedStatement stmt = conn.prepareStatement(
+                //if the user already exists, do not insert again. uuid = uuid means do nothing
+                "INSERT INTO users (uuid, username) VALUES (?, ?) ON DUPLICATE KEY UPDATE uuid = uuid")) {
+            stmt.setString(1, playerUUID);
+            stmt.setString(2, playerName);
+            int row = stmt.executeUpdate();
+            return row;
+        } catch (Exception e) {
+            throw new RuntimeException("Database insertion error in insertUser(): " + e.getMessage());
+        }
+    }
+
+    public Map<String, Integer> insertGameUsers(int gameId, List<String> playerUUIDs) {
+        // Insert all users in a game into the user_games table for that game
+        // One entry per user per game
+        Map<String, Integer> rows = new HashMap<String,Integer>();
+        for (String playerUUID : playerUUIDs) {
+            try (Connection conn = getConn();
+                PreparedStatement stmt = conn.prepareStatement(
+                    "INSERT INTO user_games (uuid, game_id) VALUES (?, ?)")) {
+                stmt.setString(1, playerUUID);
+                stmt.setInt(2, gameId);
+                int row = stmt.executeUpdate();
+                rows.put(playerUUID, row);
+
+            } catch (Exception e) {
+                throw new RuntimeException("Database insertion error in insertGameUsers(): " + e.getMessage());
+            }
+        }
+        return rows;
     }
 
     //add grimoire state to the action notes for spy SOMEHOW
