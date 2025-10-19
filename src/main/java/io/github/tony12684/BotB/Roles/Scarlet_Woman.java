@@ -12,6 +12,6 @@ import io.github.tony12684.BotB.Role;
 
 public class Scarlet_Woman extends Role {
     public Scarlet_Woman() {
-        super("Scarlet_Woman", "Minion");
+        super("Scarlet Woman", "Minion");
     }
 }
