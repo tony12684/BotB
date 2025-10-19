@@ -1,32 +1,39 @@
 package io.github.tony12684.BotB;
 
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import net.md_5.bungee.api.ChatColor;
 
-public class Game extends JavaPlugin {
+public class Game {
     // Game class to manage the state and logic of a Blood on the Blocktower game
-    private String startTime; // ISO-8601 format yyyy-MM-ddTHH:mm:ss
     private String gameState;// e.g. "setup", "daytime", "voting", "nighttime", "ended"
     private int dayCount; // Tracks what day it is in the game
     private StorytellerPerformer storyteller; // Performer object of the storyteller player
     private Grimoire grimoire; // Grimoire object for the storyteller
     private List<PlayerPerformer> players; // List of non storyteller PlayerPerformers
     private List<Role> publicRoles; // List of Role objects for available "bluff" roles
+    private Main plugin;
     
-    public Game(String storytellerUUID, List<String> playerUUIDs) {
+    public Game(Main plugin, String storytellerUUID, List<String> playerUUIDs) {
         //Constructor for Game class
-        this.startTime = getTime();
+        //Responsible for game setup sequencing
+
         this.gameState = "setup";
         this.dayCount = 0;
+        this.plugin = plugin;
+        try {
+            int gameId = plugin.insertGameStartToDB();
+            Bukkit.getLogger().info("Game started with ID: " + gameId);
+        } catch (Exception e) {
+            crashGame("Database error on game start: " + e.getMessage(), storytellerUUID);
+        }
 
+        /*
         this.storyteller = new StorytellerPerformer(storytellerUUID, new Role("Storyteller", "Storyteller"));
         this.grimoire = new Grimoire(storytellerUUID);
 
@@ -44,17 +51,13 @@ public class Game extends JavaPlugin {
 
         firstNight(players); // Proceed to the first night phase
         //TODO build daytime, voting and subsequent night phases loop
+        */
     }
 
     private int saveGameStart() {
         //Add a new game entry to the database and return the game ID
         
         return 0;
-    }
-
-    private String getTime() {
-        // Return the current time in ISO-8601 format
-        return java.time.LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME);
     }
 
     public List<PlayerPerformer> getPlayers() {
@@ -273,7 +276,9 @@ public class Game extends JavaPlugin {
         // Handle game crash scenario
         // TODO build a proper crash handler that effects game state without server reboot
         // TODO handle exceptions to try to keep the game running if possible
-        getLogger().warning("Game crashed: " + reason);
+        Bukkit.getLogger().warning("Game crashed: " + reason);
         Bukkit.getPlayer(storytellerUUID).sendMessage(ChatColor.RED + reason);
     }
+
+
 }
