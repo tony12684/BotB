@@ -1,8 +1,6 @@
 package io.github.tony12684.BotB;
 
-
 import java.util.Map;
-import java.util.Collection;
 
 import org.bukkit.*;
 import org.bukkit.event.EventHandler;
@@ -21,14 +19,17 @@ import com.craftmend.openaudiomc.api.clients.Client;
 import com.craftmend.openaudiomc.api.VoiceApi;
 
 import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
-import com.mysql.cj.jdbc.MysqlDataSource;
 import java.sql.SQLException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+
 import javax.sql.DataSource;
 
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.constructor.Constructor;
+
+import java.io.IOException;
 import java.io.InputStream;
 
 //TODO update spigot api to latest version when possible
@@ -42,6 +43,8 @@ public class Main extends JavaPlugin implements Listener {
     //these are private so that they only load from our files once
     private ChannelManager channelManager;
     private double voiceBlockDistance;
+    private MysqlConnectionPoolDataSource dataSource;
+
     @Override
     public void onEnable() {
         //triggered when the plugin is enabled
@@ -49,15 +52,19 @@ public class Main extends JavaPlugin implements Listener {
         getLogger().info("BotB plugin enabled.");
         if (debugMode) {
             getLogger().info("onEnable is called!");
-            try {
-            initMySQLDataSource();
-            } catch (SQLException e) {
-                getLogger().severe("Failed to initialize MySQL DataSource: " + e.getMessage());
-            }
-
-
-
         }
+
+        //register commands
+        this.getCommand("BOTBStartGame").setExecutor(new CommandBOTBStartGame());
+
+        //database initialization
+        try {
+        dataSource = initMySQLDataSource();
+        initializeDatabase();
+        } catch (Exception e) {
+            getLogger().severe("Failed to initialize Database");
+        }
+
         //server initialization
         ServerSettingsInit serverSettings = new ServerSettingsInit();
         serverSettings.initializeServerSettings();
@@ -86,17 +93,17 @@ public class Main extends JavaPlugin implements Listener {
         getLogger().info("BotB plugin disabled.");
     }
 
+    public Main getInstance() {
+        return this;
+    }
+
     @EventHandler
     public void asyncPlayerChat(AsyncPlayerChatEvent event) {
         //triggered when a player sends a chat message
         // TODO: make it so that players who are in a voice chat only message those people
         // TODO: wiretap all player messages to storyteller?
-        // TODO move this start game trigger to player command preprocess event and build game start command
 
-        if (debugMode) {getLogger().info("Async player chat event for : " + event.getPlayer().getDisplayName());}
-        if (event.getMessage() != null && event.getMessage().startsWith("BOTBSTART")) {
-            nightTime();
-        }
+        //if (debugMode) {getLogger().info("Async player chat event for : " + event.getPlayer().getDisplayName());}
     }
 
     @EventHandler
@@ -148,7 +155,6 @@ public class Main extends JavaPlugin implements Listener {
         if (event.getEntityType().toString().equals("PLAYER")) {
             Bukkit.getPlayer(event.getEntity().getUniqueId()).setHealth(20);
             Bukkit.getPlayer(event.getEntity().getUniqueId()).setFoodLevel(20);
-            nightTime();
         }
     }
     
@@ -187,6 +193,42 @@ public class Main extends JavaPlugin implements Listener {
             getLogger().info("Using default voice block distance: " + defaultVoiceBlockDistance);
             return defaultVoiceBlockDistance;
         }
+        //TODO replace with an thrown exception
+        return null;
+    }
+
+    private MysqlConnectionPoolDataSource initMySQLDataSource() throws SQLException {
+
+        // this will only successfully create the Yaml if you build the constructor with LoaderOptions
+        // i do not know why
+
+        // load yaml configuration for DB connection
+        LoaderOptions options = new LoaderOptions();
+        Yaml yaml = new Yaml(new Constructor(Config.class, options));
+        try (InputStream in = Main.class.getResourceAsStream("/connectionData.yaml")) {
+            Config config = yaml.load(in);
+            getLogger().info("Database URL: " + config.getUrl());
+            getLogger().info("Database Port: " + config.getPort());
+            getLogger().info("Database Username: " + config.getUsername());
+
+            //pull database info from config
+            //TODO streamline config database object interaction
+            Database database = config.getDatabase();
+            MysqlConnectionPoolDataSource dataSource = new MysqlConnectionPoolDataSource();
+            dataSource.setServerName(database.getHost());
+            dataSource.setPortNumber(database.getPort());
+            dataSource.setDatabaseName(database.getDatabase());
+            dataSource.setUser(database.getUser());
+            dataSource.setPassword(database.getPassword());
+            //dataSource.set
+            //test it and send it back out
+            testDataSource(dataSource);
+            getLogger().info("MySQL DataSource initialized successfully.");
+            return dataSource;
+        } catch (Exception e) {
+            getLogger().severe("Failed to load configuration: " + e.getMessage());
+        }
+        //TODO replace with an thrown exception
         return null;
     }
 
@@ -201,40 +243,8 @@ public class Main extends JavaPlugin implements Listener {
         }
     }
 
-    private MysqlDataSource initMySQLDataSource() throws SQLException {
-
-        // this will only successfully create the yaml if you build the constructor with LoaderOptions
-        // i do not know why
-
-        // load yaml configuration for DB connection
-        LoaderOptions options = new LoaderOptions();
-        Yaml yaml = new Yaml(new Constructor(Config.class, options));
-        try (InputStream in = Main.class.getResourceAsStream("/connectionData.yaml")) {
-            Config config = yaml.load(in);
-            getLogger().info("Database URL: " + config.getUrl());
-            getLogger().info("Database Port: " + config.getPort());
-            getLogger().info("Database Username: " + config.getUsername());
-            // It's not a good idea to log passwords, so we won't do that here
-            // we set our credentials
-
-            //pull database info from config
-            //TODO streamline config database object interaction
-            Database database = config.getDatabase();
-            MysqlDataSource dataSource = new MysqlConnectionPoolDataSource();
-            dataSource.setServerName(database.getHost());
-            dataSource.setPortNumber(database.getPort());
-            dataSource.setDatabaseName(database.getDatabase());
-            dataSource.setUser(database.getUser());
-            dataSource.setPassword(database.getPassword());
-            //dataSource.set
-            //test it and send it back out
-            testDataSource(dataSource);
-            getLogger().info("MySQL DataSource initialized successfully.");
-            return dataSource;
-        } catch (Exception e) {
-            getLogger().severe("Failed to load configuration: " + e.getMessage());
-        }
-        return null;
+    private Connection getConn() throws SQLException {
+        return dataSource.getConnection();
     }
 
     private void changeChannel(String channelTarget, Player player, boolean leaveCurrent) {
@@ -264,6 +274,7 @@ public class Main extends JavaPlugin implements Listener {
         }
     }
 
+    /*
     public void nightTime() {
         //set time to night in the main world
         String worldName = loadFromSettings("worldName").toString();
@@ -284,7 +295,9 @@ public class Main extends JavaPlugin implements Listener {
             getLogger().warning("World " + worldName + " not found! Cannot set time to night.");
         }
     }
+    */
 
+    /*
     public void dayTime() {
         //set time to day in the main world
         String worldName = loadFromSettings("worldName").toString();
@@ -305,8 +318,54 @@ public class Main extends JavaPlugin implements Listener {
             getLogger().warning("World " + worldName + " not found! Cannot set time to day.");
         }
     }
-    //when giving roles out do not log it as an action
-    //  EXCEPT when giving a fake role to the drunk
+    */
+
+    private boolean initializeDatabase() throws SQLException, IOException{
+        //build database tables if they do not exist
+        //TODO implement database table building
+        String setup;
+        try (InputStream in = getClassLoader().getResourceAsStream("BOTB_database_setup.sql")) {
+            if (in != null) {
+                setup = new String(in.readAllBytes());
+            } else {
+                getLogger().severe("Database setup SQL file not found!");
+                return false;
+            }
+        } catch (IOException e) {
+            getLogger().severe("Error reading database setup SQL file: " + e.getMessage());
+            throw e;
+        }
+        String[] queries = setup.split(";");
+        for (String query : queries) {
+            String trimmedQuery = query.trim();
+            if (!trimmedQuery.isEmpty()) {
+                try (Connection conn = getConn(); 
+                    PreparedStatement stmt = conn.prepareStatement(trimmedQuery)) {
+                    stmt.execute();
+                } catch (SQLException e) {
+                    getLogger().severe("Error executing database setup query: " + trimmedQuery);
+                    getLogger().severe("Error details: " + e.getMessage());
+                    throw e;
+                }
+            }
+        }
+        if (debugMode) { getLogger().info("Database initialized successfully."); }
+        return true;
+    }
+
+    public int insertGameStartToDB() {
+        // Initialize a new game into the database
+        // takes start time as ISO-8601 string (yyyy-MM-ddTHH:mm:ss)
+        // try with resources to auto close connections
+        try (Connection conn = getConn();
+            PreparedStatement stmt = conn.prepareStatement("INSERT INTO games (game_start_date_time) VALUES (NOW())")) {
+            int gameId = stmt.executeUpdate();
+            return gameId;
+        } catch (Exception e) {
+            throw new RuntimeException("Database insertion error in insertGameStartToDB(): " + e.getMessage());
+        }
+    }
+
     //add grimoire state to the action notes for spy SOMEHOW
     //GAME END can be used for execution actions and slayer actions and demon actions that end the game
     //avoid uuids as action notes
@@ -315,5 +374,4 @@ public class Main extends JavaPlugin implements Listener {
     //need permanent action buttons for actions that occurr outside of nighttime (slayer, gossip, moonchild)
     //juggler do up to 5 targets, the notes are up to 5 roles guessed delimited by ","
     //if game over is prevented by evil twin, maybe add a note or create an action for it?
-
 }
