@@ -36,7 +36,8 @@ public class Chef extends Role {
             chefPlayer.sendMessage("There are " + evilPairs + " pairs of evil players sitting next to each other.");
             return true;
         } catch (Exception e) {
-            throw e; // rethrow after logging
+            //TODO use better exception typing
+            throw new IllegalStateException("Error during Chef first night action: " + e.getMessage());
         }
     }
 

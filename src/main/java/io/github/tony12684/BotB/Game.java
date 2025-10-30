@@ -56,8 +56,15 @@ public class Game {
 
     private int saveGameStart() {
         //Add a new game entry to the database and return the game ID
-        
-        return 0;
+        plugin.getLogger().info("Saving game start to database...");
+        try {
+            int gameId = plugin.getNextGameIdFromDB();
+            return gameId;
+        } except (Exception e) {
+            // TODO use better exception typing
+            crashGame("Database error in saveGameStart(): " + e.getMessage(), storyteller.getUUID());
+            return -1;
+        }
     }
 
     public List<PlayerPerformer> getPlayers() {
@@ -165,7 +172,6 @@ public class Game {
         // Handle the first night phase of the game
         this.gameState = "nighttime";
         this.dayCount = 1;
-        //TODO build this
         notifyPlayersOfRoles(players);
         List<PlayerPerformer> minions = getAllMinions(players);
         PlayerPerformer demon = getDemon(players);
@@ -176,6 +182,7 @@ public class Game {
         for (PlayerPerformer player : players) {
             if (player.isDrunk() || player.isPoisoned()) {
                 //TODO implement drunk and poisoned logic
+                // Prompt storyteller for action resolution
             } else {
                 try {
                     player.getRole().firstNightAction(this);
