@@ -6,6 +6,7 @@ public class Role {
     private String startingMessage = "Have fun!"; // Message sent to player when assigned this role
     private int actionPriority; // Priority of the role's action during the night phase (lower number = higher priority)
     private Role falseRole; // A false role to display to the player instead of their actual role
+    private PlayerPerformer master; // For butler role to track chosen master
 
     public Role(String roleName, String team) {
         // Constructor for Role class

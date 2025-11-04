@@ -3,6 +3,9 @@ package io.github.tony12684.BotB;
 public class PlayerPerformer extends Performer{
     private boolean drunk = false; // Indicates if the player is drunk
     private boolean poisoned = false; // Indicates if the player is poisoned
+    private boolean alive = true; // Indicates if the player is alive
+    private PlayerPerformer rightNeighbor; // Player's right neighbor
+    private PlayerPerformer leftNeighbor; // Player's left neighbor
     private int seat; // Player's seat number
     public PlayerPerformer(String uuid, Role role) {
         // Constructor for PlayerPerformer class
@@ -23,6 +26,14 @@ public class PlayerPerformer extends Performer{
 
     public void setDrunk(boolean drunk) {
         this.drunk = drunk;
+    }
+
+    public boolean isAlive() {
+        return alive;
+    }
+
+    public void setAlive(boolean alive) {
+        this.alive = alive;
     }
 
     public boolean isPoisoned() {

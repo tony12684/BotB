@@ -33,7 +33,7 @@ public class Game {
             crashGame("Database error on game start: " + e.getMessage(), storytellerUUID);
         }
 
-        /*
+        
         this.storyteller = new StorytellerPerformer(storytellerUUID, new Role("Storyteller", "Storyteller"));
         this.grimoire = new Grimoire(storytellerUUID);
 
@@ -43,6 +43,7 @@ public class Game {
 
         //TODO probably move all this to Game.startGame()
         assignSeats(players);
+        linkNeighbors(players);
 
         List<Role> roleList = getRoleList();
         assignRoles(players, roleList, storyteller.getUUID());
@@ -51,7 +52,7 @@ public class Game {
 
         firstNight(players); // Proceed to the first night phase
         //TODO build daytime, voting and subsequent night phases loop
-        */
+        
     }
 
     private int saveGameStart() {
@@ -110,6 +111,19 @@ public class Game {
         } // Unless players list is shuffled, order should match seat number.
         //TODO validate with storyteller
         //TODO manual seat assignment option
+    }
+
+    private void linkNeighbors(List<PlayerPerformer> players) {
+        // Link each player to their left and right neighbors based on seat order
+        List<PlayerPerformer> sortedPlayers = sortPlayersBySeatOrder(players);
+        int playerCount = sortedPlayers.size();
+        for (int i = 0; i < playerCount; i++) {
+            PlayerPerformer currentPlayer = sortedPlayers.get(i);
+            PlayerPerformer leftNeighbor = sortedPlayers.get((i - 1 + playerCount) % playerCount);
+            PlayerPerformer rightNeighbor = sortedPlayers.get((i + 1) % playerCount);
+            currentPlayer.setLeftNeighbor(leftNeighbor);
+            currentPlayer.setRightNeighbor(rightNeighbor);
+        }
     }
 
     private List<Role> getRoleList() {
