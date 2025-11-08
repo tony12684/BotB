@@ -33,16 +33,18 @@ public class Game {
             crashGame("Database error on game start: " + e.getMessage(), storytellerUUID);
         }
 
-        /*
         this.storyteller = new StorytellerPerformer(storytellerUUID, new Role("Storyteller", "Storyteller"));
         this.grimoire = new Grimoire(storytellerUUID);
 
+
+        // Build players list
         for (String uuid : playerUUIDs) {
             players.add(new PlayerPerformer(uuid, null)); // Role to be assigned later
         }
 
         //TODO probably move all this to Game.startGame()
         assignSeats(players);
+        linkNeighbors(players);
 
         List<Role> roleList = getRoleList();
         assignRoles(players, roleList, storyteller.getUUID());
@@ -51,7 +53,8 @@ public class Game {
 
         firstNight(players); // Proceed to the first night phase
         //TODO build daytime, voting and subsequent night phases loop
-        */
+        //TODO build drunk false role handling into Game class action logic
+
     }
 
     private int saveGameStart() {
@@ -103,6 +106,31 @@ public class Game {
         } // Unless players list is shuffled, order should match seat number.
         //TODO validate with storyteller
         //TODO manual seat assignment option
+    }
+
+    private void linkNeighbors(List<PlayerPerformer> players) {
+        // Link each player to their left and right neighbors based on seat order
+        List<PlayerPerformer> sortedPlayers = sortPlayersBySeatOrder(players);
+        int playerCount = sortedPlayers.size();
+        for (int i = 0; i < playerCount; i++) {
+            PlayerPerformer currentPlayer = sortedPlayers.get(i);
+            PlayerPerformer rightNeighbor;
+            PlayerPerformer leftNeighbor;
+            // first persons right neighbor is last person
+            if (i == 0) {
+                rightNeighbor = players.get(playerCount - 1);
+            } else {
+                rightNeighbor = players.get(i - 1);
+            }
+            // last persons left neighbor is first person
+            if (i == playerCount - 1) {
+                leftNeighbor = players.get(0);
+            } else {
+                leftNeighbor = players.get(i + 1);
+            }
+            currentPlayer.setRightNeighbor(rightNeighbor);
+            currentPlayer.setLeftNeighbor(leftNeighbor);
+        }
     }
 
     private List<Role> getRoleList() {

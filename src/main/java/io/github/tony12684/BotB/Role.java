@@ -67,6 +67,13 @@ public class Role {
         return false;
     }
 
+    public boolean voteAction(Game game) {
+        // Default implementation does nothing
+        // Override this method in subclasses for specific vote actions
+        // return true if action was performed successfully, false otherwise
+        return false;
+    }
+
     public int getActionPriority() {
         return actionPriority;
     }
