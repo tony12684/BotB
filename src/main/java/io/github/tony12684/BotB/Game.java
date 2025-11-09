@@ -1,4 +1,5 @@
 package io.github.tony12684.BotB;
+import io.github.tony12684.BotB.Roles.Storyteller;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,8 +34,9 @@ public class Game {
             crashGame("Database error on game start: " + e.getMessage(), storytellerUUID);
         }
 
-        this.storyteller = new StorytellerPerformer(storytellerUUID, new Role("Storyteller", "Storyteller"));
-        this.grimoire = new Grimoire(storytellerUUID);
+        // TODO update this to accept fabled storytellers
+        this.storyteller = new StorytellerPerformer(storytellerUUID, new Storyteller());
+        this.grimoire = new Grimoire(storyteller, this);
 
 
         // Build players list
@@ -65,6 +67,7 @@ public class Game {
 
     public List<PlayerPerformer> getPlayers() {
         // Return a copy of the players list to prevent external modification
+        // TODO pass the actual list reference?
         List<PlayerPerformer> copy = new ArrayList<>();
         for (PlayerPerformer player : players) {
             copy.add(player);
@@ -72,7 +75,12 @@ public class Game {
         return copy;
     }
 
+    public Grimoire getGrimoire() {
+        return grimoire;
+    }
+
     public PlayerPerformer getPlayerByRole(String roleName) {
+        // Expects that only one player has the specified role
         for (PlayerPerformer player : players) {
             if (player.getRole().getRoleName().equals(roleName)) {
                 return player;
@@ -172,21 +180,23 @@ public class Game {
     private List<PlayerPerformer> getAllMinions(List<PlayerPerformer> players) {
         List<PlayerPerformer> minions = new ArrayList<>();
         for (PlayerPerformer player : players) {
-            if (player.getRole().getTeam().equals("Minion")) {
+            if (player.getRole().getAffiliation().equals("Minion")) {
                 minions.add(player);
             }
         }
         return minions;
     }
 
-    private PlayerPerformer getDemon(List<PlayerPerformer> players) {
+    private List<PlayerPerformer> getDemons(List<PlayerPerformer> players) {
+        // Return a list of all Demon players in the game
+        // Pit Hag can make more than one Demon
+        List<PlayerPerformer> demons = new ArrayList<>();
         for (PlayerPerformer player : players) {
-            if (player.getRole().getTeam().equals("Demon")) {
-                return player;
+            if (player.getRole().getAffiliation().equals("Demon")) {
+                demons.add(player);
             }
         }
-        crashGame("No demon found in Game.getDemon()!", storyteller.getUUID());
-        return null; // This line should never be reached
+        return demons;
     }
 
     private void firstNight(List<PlayerPerformer> players) {
@@ -196,13 +206,14 @@ public class Game {
         //TODO build this
         notifyPlayersOfRoles(players);
         List<PlayerPerformer> minions = getAllMinions(players);
-        PlayerPerformer demon = getDemon(players);
-        minionInfo(minions, demon);
+        List<PlayerPerformer> demons = getDemons(players);
+        minionInfo(minions, demons.getFirst()); // Assumes 1 demon at start of game
         List<Role> bluffs = getBluffRoles();
-        demonInfo(demon, minions, bluffs);
+        demonInfo(demons.getFirst(), minions, bluffs);
+        // TODO add storyteller to action list to accomidate fabled roles
         sortPlayersByActionPriority(players);
         for (PlayerPerformer player : players) {
-            if (player.isDrunk() || player.isPoisoned()) {
+            if (player.getDrunk() || player.getPoisoned()) {
                 //TODO implement drunk and poisoned logic
             } else {
                 try {
