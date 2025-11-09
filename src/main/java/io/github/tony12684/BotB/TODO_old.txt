@@ -1,50 +1,32 @@
-import all the existing functions
-    create checklist of all functions to impliment
-    complete the checklist
-    parse TODO and move items into this function list
-
 quick parse the old datapack file structure for any other relevant notes
 
 TODO list
-    MISSION STATEMENT
-        make it so that the game can be played 100% within minecraft WELL
-    CODE GOALS
-        clean legible code
-        smart use of objects, methods, and global variables
-    include openaudiomc-api in project
-        i believe this is needed to interact with openAudioMC in the plugin
+    Solve drunk and poisoned player action handling
+    account for recluse with @Override getTeam()
+    refactor all established actions to accomidate action logging
+
     fix world spawn angle
-    init static voice channels
-    check openAudioMC parameters and settings
-    check if static VCs can be hidden and shown via API
+    init static voice channels automatically without modification of files
+    add ability to see voice channel when you are in it
     get nickname plugin for the server that can be adjusted via API
-    tester method that assesses all other existing methods
     reset used datapack "variables" and gut the tower
-    storyteller grimoire notes
     grimoire script viewer and creator
-    players custom role function
-        put new roles into the game that can be managed purely by storyteller
-        custom role tokens and stuff like that
-    DONE see if whispers can be intercepted with plugin
-    storyteller picker method
+    maintain codebase to allow for custom roles to be added in
     auto setup
         houses
         roles
-        high level of storyteller control for manual player positioning and roles
+        storyteller manual setup/ adjustment mode
     player locations viewer map
         for storyteller to keep tabs (and for players?)
-    consider spawn protection to prevent player item theft
+    spawn protection to prevent player item theft
     in game role descriptions viewer
     accommodation for legion role
     storyteller soundboard
     cinematic player deaths
-    players can voice chat at night option
+    players can voice chat at night toggle
     player speaking privileges revoker setting (for nomination and votes)
     reduce player information at night
-        leave teams at night make invisible rejoin teams at day to hide player names
         prevent player audio at night (nobody else hears your door spam)
-    investigate banner + map interaction for player seating arrangements
-    create fake blocks to replace the original 20 player blocks
     prevent player spawn resetting
     enhanced spectate system for non players?
     game stats tracking
