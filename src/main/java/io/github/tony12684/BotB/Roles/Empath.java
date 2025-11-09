@@ -16,7 +16,7 @@ import java.util.List;
 
 public class Empath extends Role {
     public Empath() {
-        super("Empath", "Townsfolk");
+        super("Empath", Affiliation.TOWNSFOLK, Team.GOOD);
     }
 
     @Override
@@ -35,11 +35,11 @@ public class Empath extends Role {
         // count how many are evil
         int evilCount = 0;
         for (PlayerPerformer neighbor : neighbors) {
-            String team = neighbor.getRole().getTeam();
-            if (team.equals("Minion") || team.equals("Demon")) {
+            if (neighbor.getRole().getTeam().equals(Team.EVIL)) {
                 evilCount++;
             }
         }
+        game.getGrimoire().basicMessage(game.getPlayerByRole("Empath"), "Your alive neighbors contain " + evilCount + " evil player(s).");
         return true;
     }
 
@@ -68,7 +68,7 @@ public class Empath extends Role {
                 break;
             } else if (player.getRole().getRoleName().equals("Empath")) {
                 // wrapped around, no alive neighbor found
-                // safe stop if all players are dead
+                // safe stop if all players are dead somehow
                 break;
             }
         }
