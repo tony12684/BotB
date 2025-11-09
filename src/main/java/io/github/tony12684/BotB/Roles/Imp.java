@@ -11,6 +11,6 @@ import io.github.tony12684.BotB.Role;
 
 public class Imp extends Role {
     public Imp() {
-        super("Imp", "Demon");
+        super("Imp", Affiliation.DEMON, Team.EVIL);
     }
 }

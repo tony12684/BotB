@@ -21,7 +21,7 @@ import io.github.tony12684.BotB.Game;
  //TODO implement action logging via SQL
 public class Chef extends Role {
     public Chef() {
-        super("Chef", "Townsfolk");
+        super("Chef", Affiliation.TOWNSFOLK, Team.GOOD);
     }
     
     @Override
@@ -48,8 +48,8 @@ public class Chef extends Role {
         sortedPlayers = game.sortPlayersBySeatOrder(sortedPlayers);
         for (PlayerPerformer player : sortedPlayers) {
             if (lastPlayer != null) {
-                if ((lastPlayer.getRole().getTeam().equals("Minion") || lastPlayer.getRole().getTeam().equals("Demon"))
-                && (player.getRole().getTeam().equals("Minion") || player.getRole().getTeam().equals("Demon"))) {
+                if ((lastPlayer.getRole().getTeam().equals(Team.EVIL))
+                && (player.getRole().getTeam().equals(Team.EVIL))) {
                     evilPairs++;
                 }
             }
@@ -58,8 +58,8 @@ public class Chef extends Role {
         if (lastPlayer == null) {
             throw new IllegalStateException("Unexpected Null Player in Chef.countEvilPairs()");
         }
-        if ((sortedPlayers.getFirst().getRole().getTeam().equals("Minion") || sortedPlayers.getFirst().getRole().getTeam().equals("Demon"))
-        && (lastPlayer.getRole().getTeam().equals("Minion") || lastPlayer.getRole().getTeam().equals("Demon"))) {
+        if ((sortedPlayers.getFirst().getRole().getTeam().equals(Team.EVIL))
+        && (lastPlayer.getRole().getTeam().equals(Team.EVIL))) {
             evilPairs++;
         }
         return evilPairs;

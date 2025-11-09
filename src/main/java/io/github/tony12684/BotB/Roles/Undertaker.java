@@ -11,6 +11,6 @@ import io.github.tony12684.BotB.Role;
 
 public class Undertaker extends Role {
     public Undertaker() {
-        super("Undertaker", "Townsfolk");
+        super("Undertaker", Affiliation.TOWNSFOLK, Team.GOOD);
     }
 }

@@ -13,6 +13,6 @@ import io.github.tony12684.BotB.Role;
 
 public class Virgin extends Role {
     public Virgin() {
-        super("Virgin", "Townsfolk");
+        super("Virgin", Affiliation.TOWNSFOLK, Team.GOOD);
     }
 }

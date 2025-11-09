@@ -11,6 +11,6 @@ import io.github.tony12684.BotB.Role;
 
 public class Ravenkeeper extends Role {
     public Ravenkeeper() {
-        super("Ravenkeeper", "Townsfolk");
+        super("Ravenkeeper", Affiliation.TOWNSFOLK, Team.GOOD);
     }
 }
