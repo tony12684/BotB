@@ -25,7 +25,7 @@ public class Role {
 
     public Role(String roleName, Affiliation affiliation, Team team) {
         // Constructor for Role class
-        this.roleName = roleName;
+        this.roleName = roleName; // Role name requires matching spelling and spacing to role_ids.yaml to function properly with database queries
         this.affiliation = affiliation;
         this.team = team;
     }
@@ -80,31 +80,31 @@ public class Role {
     }
 
     // TODO overhaul setup and action methods to return information nessessary for logging the actions
-    public boolean setup(Game game) {
-        return false;
+    public ActionLog setup(Game game) {
+        return null;
     }
 
-    public boolean firstNightAction(Game game) {
-        return false;
+    public ActionLog firstNightAction(Game game) {
+        return null;
     }
 
-    public boolean otherNightAction(Game game){
-        return false;
+    public ActionLog otherNightAction(Game game){
+        return null;
     }
 
-    public boolean voteAction(Game game) {
+    public ActionLog voteAction(Game game) {
         // For when you place a vote on a nominee
-        return false;
+        return null;
     }
 
-    public boolean voteNominateAction(Game game) {
+    public ActionLog voteNominateAction(Game game) {
         // For when you nominate a player for execution
-        return false;
+        return null;
     }
 
-    public boolean voteNomineeAction(Game game) {
+    public ActionLog voteNomineeAction(Game game) {
         // For when you are nominated for execution
-        return false;
+        return null;
     }
 
 }

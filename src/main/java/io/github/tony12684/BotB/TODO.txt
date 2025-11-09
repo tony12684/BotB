@@ -1,10 +1,12 @@
 quick parse the old datapack file structure for any other relevant notes
 
 TODO list
-    refactor all established actions to accomidate action logging
     Solve drunk and poisoned player action handling
     account for recluse with @Override getTeam()
+    adjust role_ids.yaml handling to accomidate new role additions.
+        maybe just add in the travellers and fabled now??
 
+    update spigot
     fix world spawn angle
     init static voice channels automatically without modification of files
     add ability to see voice channel when you are in it

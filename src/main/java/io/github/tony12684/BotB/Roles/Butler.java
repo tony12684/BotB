@@ -1,7 +1,11 @@
 package io.github.tony12684.BotB.Roles;
 import io.github.tony12684.BotB.Role;
+import io.github.tony12684.BotB.ActionLog;
 import io.github.tony12684.BotB.Game;
+import io.github.tony12684.BotB.Performer;
 import io.github.tony12684.BotB.PlayerPerformer;
+
+import java.util.List;
 
 /*
  * Butler - Outsider
@@ -19,16 +23,16 @@ public class Butler extends Role {
     }
 
     @Override
-    public boolean firstNightAction(Game game) {
+    public ActionLog firstNightAction(Game game) {
         return pickMaster(game);
     }
 
     @Override
-    public boolean otherNightAction(Game game) {
+    public ActionLog otherNightAction(Game game) {
         return pickMaster(game);
     }
 
-    private boolean pickMaster(Game game) {
+    private ActionLog pickMaster(Game game) {
         // get master choice from Butler
         master = null;
         while (master == null) {
@@ -38,13 +42,13 @@ public class Butler extends Role {
                 master = null;
             }
         }
-
-        return true;
+        List<Performer> targets = List.of(master);
+        return new ActionLog(game.getPlayerByRole("Butler"), "butler_master_choice", true, null, targets);
     }
 
     @Override
-    public boolean voteAction(Game game) {
+    public ActionLog voteAction(Game game) {
         // TODO implement vote restriction based on master's vote
-        return true;
+        return null;
     }
 }

@@ -1,6 +1,8 @@
 package io.github.tony12684.BotB.Roles;
 import io.github.tony12684.BotB.Role;
+import io.github.tony12684.BotB.ActionLog;
 import io.github.tony12684.BotB.Game;
+import io.github.tony12684.BotB.Performer;
 import io.github.tony12684.BotB.PlayerPerformer;
 
 import java.util.ArrayList;
@@ -20,16 +22,15 @@ public class Empath extends Role {
     }
 
     @Override
-    public boolean firstNightAction(Game game) {
+    public ActionLog firstNightAction(Game game) {
         return empathy(game);
     }
     @Override
-    public boolean otherNightAction(Game game) {
+    public ActionLog otherNightAction(Game game) {
         return empathy(game);
     }
 
-    private boolean empathy(Game game) {
-        // TODO implement Empath logic to count alive evil neighbors
+    private ActionLog empathy(Game game) {
         // get alive neighbors of the Empath player
         List<PlayerPerformer> neighbors = getLivingNeighbors(game);
         // count how many are evil
@@ -40,7 +41,11 @@ public class Empath extends Role {
             }
         }
         game.getGrimoire().basicMessage(game.getPlayerByRole("Empath"), "Your alive neighbors contain " + evilCount + " evil player(s).");
-        return true;
+        List<Performer> targets = new ArrayList<Performer>();
+        for (PlayerPerformer neighbor : neighbors) {
+            targets.add(neighbor);
+        }
+        return new ActionLog(game.getPlayerByRole("Empath"), "empath", false, Integer.toString(evilCount), targets);
     }
 
     private List<PlayerPerformer> getLivingNeighbors(Game game) {

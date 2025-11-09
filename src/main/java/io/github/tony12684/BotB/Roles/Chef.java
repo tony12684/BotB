@@ -1,13 +1,15 @@
 package io.github.tony12684.BotB.Roles;
+import io.github.tony12684.BotB.PlayerPerformer;
+import io.github.tony12684.BotB.Role;
+import io.github.tony12684.BotB.ActionLog;
+import io.github.tony12684.BotB.Game;
 
 import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import io.github.tony12684.BotB.PlayerPerformer;
-import io.github.tony12684.BotB.Role;
-import io.github.tony12684.BotB.Game;
+
 
 /*
  * Chef - Townsfolk
@@ -25,7 +27,7 @@ public class Chef extends Role {
     }
     
     @Override
-    public boolean firstNightAction(Game game) {
+    public ActionLog firstNightAction(Game game) {
         PlayerPerformer chef = game.getPlayerByRole("Chef");
         if (chef == null) {
             throw new IllegalStateException("Chef player not found in game during first night action.");
@@ -34,7 +36,7 @@ public class Chef extends Role {
             Integer evilPairs = countEvilPairs(game);
             Player chefPlayer = Bukkit.getPlayer(chef.getUUID());
             chefPlayer.sendMessage("There are " + evilPairs + " pairs of evil players sitting next to each other.");
-            return true;
+            return new ActionLog(chef, "chef", false, evilPairs.toString(), null);
         } catch (Exception e) {
             throw e; // rethrow after logging
         }
