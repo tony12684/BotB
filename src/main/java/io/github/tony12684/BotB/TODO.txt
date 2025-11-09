@@ -1,9 +1,9 @@
 quick parse the old datapack file structure for any other relevant notes
 
 TODO list
+    refactor all established actions to accomidate action logging
     Solve drunk and poisoned player action handling
     account for recluse with @Override getTeam()
-    refactor all established actions to accomidate action logging
 
     fix world spawn angle
     init static voice channels automatically without modification of files
