@@ -19,14 +19,14 @@ CREATE TABLE IF NOT EXISTS games ( /* each played game */
   game_id int PRIMARY KEY AUTO_INCREMENT,
   game_start_date_time datetime NOT NULL, /* yyyy-MM-ddTHH:mm:ss */
   game_end_date_time datetime, /* yyyy-MM-ddTHH:mm:ss */
-  team_id int, /* **, the winning team */
+  won_team_id int, /* **, the winning team */
   FOREIGN KEY (team_id) REFERENCES teams(team_id)
 );
 
 CREATE TABLE IF NOT EXISTS user_games ( /* which users played in which games */
   user_games_id int PRIMARY KEY AUTO_INCREMENT,
-  uuid char(36) NOT NULL, /* ** */
   game_id int NOT NULL, /* ** */
+  uuid char(36) NOT NULL, /* ** */
   FOREIGN KEY (game_id) REFERENCES games(game_id),
   FOREIGN KEY (uuid) REFERENCES users(uuid)
 );
@@ -48,6 +48,10 @@ CREATE TABLE IF NOT EXISTS actions (/* all documented actions taken by users in 
   FOREIGN KEY (team_id) REFERENCES teams(team_id),
   FOREIGN KEY (role_id) REFERENCES roles(role_id)
 );
+
+/*
+INSERT INTO actions (game_id, uuid, team_id, role_id, action_day, action_type, action_contains_lie, action_has_targets, action_date_time, action_notes) VALUES (1, 123456789012345678901234567890123456, 1, (SELECT role_id FROM roles WHERE role_name = 'washerwoman'), 1, 'test', false, false, (NOW()), 'test')
+*/
 
 CREATE TABLE IF NOT EXISTS seats ( /* which seat each user had in each game */
   seat_id int PRIMARY KEY AUTO_INCREMENT,
@@ -71,6 +75,10 @@ CREATE TABLE IF NOT EXISTS user_game_roles ( /* which roles each user had in eac
   FOREIGN KEY (uuid) REFERENCES users(uuid),
   FOREIGN KEY (action_id) REFERENCES actions(action_id)
 ); /* in the case of role changes, multiple entries per user per game */
+
+/*
+INSERT INTO user_game_roles (game_id, uuid, role_id, action_id) VALUES (1, 123456789012345678901234567890123456, (SELECT role_id FROM roles WHERE role_name = 'washerwoman'), NULL)
+*/
 
 CREATE TABLE IF NOT EXISTS user_game_teams ( /* which teams each user was on in each game */
   user_game_teams_id int PRIMARY KEY AUTO_INCREMENT,
