@@ -15,7 +15,7 @@ public class Butler extends Role {
     private PlayerPerformer master = null;
 
     public Butler() {
-        super("Butler", "Outsider");
+        super("Butler", Affiliation.OUTSIDER, Team.GOOD);
     }
 
     @Override
@@ -29,9 +29,16 @@ public class Butler extends Role {
     }
 
     private boolean pickMaster(Game game) {
-        // TODO get input from the Butler player to choose their master
-        // REMOVE THIS LINE WHEN IMPLEMENTING
-        PlayerPerformer master = game.getPlayerByRole("Butler");
+        // get master choice from Butler
+        master = null;
+        while (master == null) {
+            master = game.getGrimoire().getFreeTargetsFromPlayer(game.getPlayerByRole("Butler"), 1, "Choose your master. You cannot choose yourself.").getFirst();
+            if (master.getUUID().equals(game.getPlayerByRole("Butler").getUUID())) {
+                game.getGrimoire().errorMessage(game.getPlayerByRole("Butler"), "You cannot choose yourself as your master. Please select again.");
+                master = null;
+            }
+        }
+
         return true;
     }
 
