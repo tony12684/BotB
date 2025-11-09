@@ -10,8 +10,8 @@ import io.github.tony12684.BotB.Role;
  * //probably just show recluse players role when verifying with storyteller.
  */
 
-public class Reculse extends Role {
-    public Reculse() {
-        super("Reculse", "Outsider");
+public class Recluse extends Role {
+    public Recluse() {
+        super("Recluse", Affiliation.OUTSIDER, Team.GOOD);
     }
 }
