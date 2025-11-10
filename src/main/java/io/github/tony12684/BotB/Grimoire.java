@@ -20,15 +20,20 @@ public class Grimoire {
     }
 
     public void errorMessage(Performer performer, String message) {
-        // Method to show error messages to a player
+        // Method to show error messages to a performer
     }
 
     public List<PlayerPerformer> getFreeTargetsFromPlayer(Performer actingPerformer, int numberOfTargets, String message) {
-        // Method to get some number of unrestricted targets from a player
+        // Method to get some number of unrestricted targets from a performer
         return null; // Placeholder return;
     }
 
+    public int getNumber(Performer performer, String promptMessage) {
+        // Method to get a number input from a performer
+        return 0; // Placeholder return;
+    }
+
     public void basicMessage(Performer performer, String message) {
-        // Method to show action results to a player
+        // Method to show action results to a performer
     }
 }
