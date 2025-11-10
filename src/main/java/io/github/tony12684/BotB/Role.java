@@ -88,7 +88,17 @@ public class Role {
         return null;
     }
 
+    public ActionLog falseFirstNightAction(Game game) {
+        // For drunk and poisoned players
+        return null;
+    }
+
     public ActionLog otherNightAction(Game game){
+        return null;
+    }
+
+    public ActionLog falseOtherNightAction(Game game) {
+        // For drunk and poisoned players
         return null;
     }
 
@@ -97,13 +107,28 @@ public class Role {
         return null;
     }
 
+    public ActionLog falseVoteAction(Game game) {
+        // For drunk and poisoned players
+        return null;
+    }
+
     public ActionLog voteNominateAction(Game game) {
         // For when you nominate a player for execution
         return null;
     }
 
+    public ActionLog falseVoteNominateAction(Game game) {
+        // For drunk and poisoned players
+        return null;
+    }
+
     public ActionLog voteNomineeAction(Game game) {
         // For when you are nominated for execution
+        return null;
+    }
+
+    public ActionLog falseVoteNomineeAction(Game game) {
+        // For drunk and poisoned players
         return null;
     }
 

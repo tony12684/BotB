@@ -37,9 +37,29 @@ public class Fortune_Teller extends Role {
     }
 
     @Override
+    public ActionLog firstNightAction(Game game) {
+        return crystalBall(game);
+    }
+    @Override
     public ActionLog otherNightAction(Game game) {
-        // TODO implement default random time lag to reduce fortune teller metagaming
+        return crystalBall(game);
+    }
+
+    private ActionLog crystalBall(Game game) {
         // TODO implement Fortune Teller logic to choose 2 players and learn if either is a Demon
         return null;
     }
-}
+
+    @Override
+    public ActionLog falseFirstNightAction(Game game) {
+        return cloudyBall(game);
+    }
+    @Override
+    public ActionLog falseOtherNightAction(Game game) {
+        return cloudyBall(game);
+    }
+
+    private ActionLog cloudyBall(Game game) {
+        // TODO implement cloudy ball logic
+        return null;
+    }

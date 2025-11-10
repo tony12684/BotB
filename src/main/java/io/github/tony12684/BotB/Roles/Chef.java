@@ -6,9 +6,6 @@ import io.github.tony12684.BotB.Game;
 
 import java.util.List;
 
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-
 
 
 /*
@@ -34,16 +31,24 @@ public class Chef extends Role {
         }
         try {
             Integer evilPairs = countEvilPairs(game);
-            Player chefPlayer = Bukkit.getPlayer(chef.getUUID());
-            chefPlayer.sendMessage("There are " + evilPairs + " pairs of evil players sitting next to each other.");
+            game.getGrimoire().basicMessage(chef, "There are " + evilPairs + " pairs of evil players sitting next to each other.");
             return new ActionLog(chef, "chef", false, evilPairs.toString(), null);
         } catch (Exception e) {
             throw e; // rethrow after logging
         }
     }
 
+    @Override
+    public ActionLog falseFirstNightAction(Game game) {
+        // prompt storyteller to provide some number
+        int evilPairs = game.getGrimoire().getNumber(game.getStoryteller(), "Provide a number of evil pairs to show the drunk/poisoned Chef.");
+        game.getGrimoire().basicMessage(game.getPlayerByRole("Chef"), "There are " + evilPairs + " pairs of evil players sitting next to each other.");
+        return new ActionLog(game.getStoryteller(), "chef", true, Integer.toString(evilPairs), null);
+    }
+
     private Integer countEvilPairs(Game game) {
         // for each sequential pair of players in seating order, check if both are evil
+        // TODO redo with linked list implementation?
         PlayerPerformer lastPlayer = null;
         int evilPairs = 0;
         List<PlayerPerformer> sortedPlayers = game.getPlayers();

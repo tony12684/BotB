@@ -13,6 +13,7 @@ import java.util.List;
  * No special setup.
  * First night action.
  * Other night action.
+ * Vote action restriction based on master's vote.
  */
 
 public class Butler extends Role {
@@ -32,6 +33,19 @@ public class Butler extends Role {
         return pickMaster(game);
     }
 
+    @Override
+    public ActionLog falseFirstNightAction(Game game) {
+        // No modification required for drunk and poisoned butler.
+        // prompt storyteller to provide some number
+        return null;
+    }
+    
+    @Override
+    public ActionLog falseOtherNightAction(Game game) {
+        // No modification required for drunk and poisoned butler.
+        return pickMaster(game);
+    }
+
     private ActionLog pickMaster(Game game) {
         // get master choice from Butler
         master = null;
@@ -45,6 +59,7 @@ public class Butler extends Role {
         List<Performer> targets = List.of(master);
         return new ActionLog(game.getPlayerByRole("Butler"), "butler_master_choice", true, null, targets);
     }
+    
 
     @Override
     public ActionLog voteAction(Game game) {

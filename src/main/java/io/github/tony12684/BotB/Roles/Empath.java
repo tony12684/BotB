@@ -29,6 +29,22 @@ public class Empath extends Role {
     public ActionLog otherNightAction(Game game) {
         return empathy(game);
     }
+    
+    @Override
+    public ActionLog falseFirstNightAction(Game game) {
+        return apathy(game);
+    }
+    @Override
+    public ActionLog falseOtherNightAction(Game game) {
+        return apathy(game);
+    }
+
+    private ActionLog apathy(Game game) {
+        // prompt storyteller to provide some number
+        int evilCount = game.getGrimoire().getNumber(game.getStoryteller(), "Provide a number of evil neighbors to show the drunk/poisoned Empath.");
+        game.getGrimoire().basicMessage(game.getPlayerByRole("Empath"), "Your alive neighbors contain " + evilCount + " evil player(s).");
+        return new ActionLog(game.getStoryteller(), "empath", true, Integer.toString(evilCount), null);
+    }
 
     private ActionLog empathy(Game game) {
         // get alive neighbors of the Empath player
