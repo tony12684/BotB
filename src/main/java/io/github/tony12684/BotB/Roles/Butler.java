@@ -50,7 +50,7 @@ public class Butler extends Role {
         // get master choice from Butler
         master = null;
         while (master == null) {
-            master = game.getGrimoire().getFreeTargetsFromPlayer(game.getPlayerByRole("Butler"), 1, "Choose your master. You cannot choose yourself.").getFirst();
+            master = game.getGrimoire().getFreeTargetsFromPerformer(game.getPlayerByRole("Butler"), 1, "Choose your master. You cannot choose yourself.").getFirst();
             if (master.getUUID().equals(game.getPlayerByRole("Butler").getUUID())) {
                 game.getGrimoire().errorMessage(game.getPlayerByRole("Butler"), "You cannot choose yourself as your master. Please select again.");
                 master = null;
