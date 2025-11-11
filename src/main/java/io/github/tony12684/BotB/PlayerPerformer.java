@@ -8,9 +8,9 @@ public class PlayerPerformer extends Performer{
     // Left neighbor is +1 seat, right neighbor is -1 seat by default
     private PlayerPerformer leftNeighbor = null; // Reference to the left neighbor
     private PlayerPerformer rightNeighbor = null; // Reference to the right neighbor
-    public PlayerPerformer(String uuid, Role role) {
+    public PlayerPerformer(String uuid, Role role, String name) {
         // Constructor for PlayerPerformer class
-        super(uuid, role);
+        super(uuid, role, name);
     }
 
     public boolean getDrunk() {
