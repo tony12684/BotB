@@ -1,8 +1,6 @@
 quick parse the old datapack file structure for any other relevant notes
 
 TODO list
-    Solve drunk and poisoned player action handling
-    account for recluse with @Override getTeam()
     adjust role_ids.yaml handling to accomidate new role additions.
         maybe just add in the travellers and fabled now??
 
