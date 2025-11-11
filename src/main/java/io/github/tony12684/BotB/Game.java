@@ -1,4 +1,5 @@
 package io.github.tony12684.BotB;
+import io.github.tony12684.BotB.Role.Affiliation;
 import io.github.tony12684.BotB.Roles.Storyteller;
 
 import java.util.ArrayList;
@@ -17,7 +18,6 @@ public class Game {
     private StorytellerPerformer storyteller; // Performer object of the storyteller player
     private Grimoire grimoire; // Grimoire object for the storyteller
     private List<PlayerPerformer> players; // List of non storyteller PlayerPerformers
-    private List<Role> publicRoles; // List of Role objects for available "bluff" roles
     private Main plugin;
     
     public Game(Main plugin, String storytellerUUID, List<String> playerUUIDs) {
@@ -35,13 +35,14 @@ public class Game {
         }
 
         // TODO update this to accept fabled storytellers
-        this.storyteller = new StorytellerPerformer(storytellerUUID, new Storyteller());
+        this.storyteller = new StorytellerPerformer(storytellerUUID, new Storyteller(), Bukkit.getPlayer(storytellerUUID).getName());
         this.grimoire = new Grimoire(storyteller, this);
 
 
         // Build players list
         for (String uuid : playerUUIDs) {
-            players.add(new PlayerPerformer(uuid, null)); // Role to be assigned later
+            players.add(new PlayerPerformer(uuid, null, Bukkit.getPlayer(uuid).getName())); // Role to be assigned later
+            // TODO adjust for nickname plugin support
         }
 
         //TODO probably move all this to Game.startGame()
@@ -81,8 +82,9 @@ public class Game {
 
     public PlayerPerformer getPlayerByRole(String roleName) {
         // Expects that only one player has the specified role
+        // TODO make this more efficent with a map?
         for (PlayerPerformer player : players) {
-            if (player.getRole().getRoleName().equals(roleName)) {
+            if (player.getRole().getRoleNameActual().equals(roleName)) {
                 return player;
             }
         }
@@ -90,8 +92,8 @@ public class Game {
     }
 
     public StorytellerPerformer getStoryteller() {
-        // Return a copy of the storyteller performer to prevent external modification
-        StorytellerPerformer storyteller = new StorytellerPerformer(this.storyteller.getUUID(), this.storyteller.getRole());
+        // Return the storyteller performer
+        // aliasing not an issue since StorytellerPerformer is final
         return storyteller;
     }
 
@@ -180,7 +182,7 @@ public class Game {
     private List<PlayerPerformer> getAllMinions(List<PlayerPerformer> players) {
         List<PlayerPerformer> minions = new ArrayList<>();
         for (PlayerPerformer player : players) {
-            if (player.getRole().getAffiliation().equals("Minion")) {
+            if (player.getRole().getAffiliationActual().equals(Affiliation.MINION)) {
                 minions.add(player);
             }
         }
@@ -192,7 +194,7 @@ public class Game {
         // Pit Hag can make more than one Demon
         List<PlayerPerformer> demons = new ArrayList<>();
         for (PlayerPerformer player : players) {
-            if (player.getRole().getAffiliation().equals("Demon")) {
+            if (player.getRole().getAffiliationActual().equals(Affiliation.DEMON)) {
                 demons.add(player);
             }
         }
@@ -235,12 +237,12 @@ public class Game {
             if (bukkitPlayer != null && bukkitPlayer.isOnline()) {
                 StringBuilder message;
                 if (player.getRole().getFalseRole() != null) { // If the role has a false role, show that instead
-                    message = new StringBuilder(ChatColor.GRAY + "You are the " + player.getRole().getFalseRole().getRoleName() + ".\n");
-                    message.append("Your team is: ").append(player.getRole().getFalseRole().getTeam()).append("\n");
+                    message = new StringBuilder(ChatColor.GRAY + "You are the " + player.getRole().getFalseRole().getRoleNameActual() + ".\n");
+                    message.append("Your team is: ").append(player.getRole().getFalseRole().getTeamActual().toString()).append("\n");
                     message.append(player.getRole().getFalseRole().getStartingMessage());
                 } else {
-                    message = new StringBuilder(ChatColor.GRAY + "You are the " + player.getRole().getRoleName() + ".\n");
-                    message.append("Your team is: ").append(player.getRole().getTeam()).append("\n");
+                    message = new StringBuilder(ChatColor.GRAY + "You are the " + player.getRole().getRoleNameActual() + ".\n");
+                    message.append("Your team is: ").append(player.getRole().getTeamActual().toString()).append("\n");
                     message.append(player.getRole().getStartingMessage());
                 }
                 bukkitPlayer.sendMessage(message.toString());
@@ -295,9 +297,10 @@ public class Game {
             if (!bluffRoles.isEmpty()) {
                 info.append("Available Bluff Roles:\n");
                 for (Role bluff : bluffRoles) {
-                    info.append("- ").append(bluff.getRoleName()).append("\n");
+                    info.append("- ").append(bluff.getRoleNameActual()).append("\n");
                 }
             } else {
+                // This should never happen in a standard game
                 info.append("No Bluff Roles available.\n");
             }
             player.sendMessage(info.toString());

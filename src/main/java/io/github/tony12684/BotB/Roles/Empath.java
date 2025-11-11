@@ -41,7 +41,7 @@ public class Empath extends Role {
 
     private ActionLog apathy(Game game) {
         // prompt storyteller to provide some number
-        int evilCount = game.getGrimoire().getNumber(game.getStoryteller(), "Provide a number of evil neighbors to show the drunk/poisoned Empath.");
+        int evilCount = game.getGrimoire().getNumberFromPerformer(game.getStoryteller(), "Provide a number of evil neighbors to show the drunk/poisoned Empath.");
         game.getGrimoire().basicMessage(game.getPlayerByRole("Empath"), "Your alive neighbors contain " + evilCount + " evil player(s).");
         return new ActionLog(game.getStoryteller(), "empath", true, Integer.toString(evilCount), null);
     }
@@ -52,7 +52,11 @@ public class Empath extends Role {
         // count how many are evil
         int evilCount = 0;
         for (PlayerPerformer neighbor : neighbors) {
-            if (neighbor.getRole().getTeam().equals(Team.EVIL)) {
+            if (neighbor.getRole().getTeam(
+                game.getGrimoire(),
+                game.getPlayerByRole("Empath").getName(),
+                "Empath",
+                neighbor.getName()).equals(Team.EVIL)) {
                 evilCount++;
             }
         }
@@ -74,7 +78,7 @@ public class Empath extends Role {
             if (player.getAlive()) {
                 neighbors.add(player);
                 break;
-            } else if (player.getRole().getRoleName().equals("Empath")) {
+            } else if (player.getRole().getRoleNameActual().equals("Empath")) {
                 // wrapped around, no alive neighbor found
                 // safe stop if all players are dead
                 break;
@@ -87,7 +91,7 @@ public class Empath extends Role {
             if (player.getAlive()) {
                 neighbors.add(player);
                 break;
-            } else if (player.getRole().getRoleName().equals("Empath")) {
+            } else if (player.getRole().getRoleNameActual().equals("Empath")) {
                 // wrapped around, no alive neighbor found
                 // safe stop if all players are dead somehow
                 break;

@@ -41,7 +41,15 @@ public class Role {
         return startingMessage;
     }
     
-    public String getRoleName() {
+    public String getRoleNameActual() {
+        // NOT for use with game logic that may involve lying roles
+        return roleName;
+    }
+
+    public String getRoleName(Grimoire grimoire, String requestingName, String requestingRole, String targetName) {
+        // requestingName for the player requesting the role name
+        // requestingRole for what role is requesting the role name
+        // game so that we can ask the storyteller if needed
         return roleName;
     }
 
@@ -49,7 +57,15 @@ public class Role {
         this.roleName = roleName;
     }
 
-    public Team getTeam() {
+    public Team getTeamActual() {
+        // NOT for use with game logic that may involve lying roles
+        return team;
+    }
+
+    public Team getTeam(Grimoire grimoire, String requestingName, String requestingRole, String targetName) {
+        // requestingName for the player requesting the team
+        // requestingRole for what role is requesting the team
+        // game so that we can ask the storyteller if needed
         return team;
     }
 
@@ -57,9 +73,18 @@ public class Role {
         this.team = team;
     }
 
-    public Affiliation getAffiliation() {
+    public Affiliation getAffiliationActual() {
+        // NOT for use with game logic that may involve lying roles
         return affiliation;
     }
+
+    public Affiliation getAffiliation(Grimoire grimoire, String requestingName, String requestingRole, String targetName) {
+        // requestingName for the player requesting the affiliation
+        // requestingRole for what role is requesting the affiliation
+        // game so that we can ask the storyteller if needed
+        return affiliation;
+    }
+
     public void setAffiliation(Affiliation affiliation) {
         this.affiliation = affiliation;
     }

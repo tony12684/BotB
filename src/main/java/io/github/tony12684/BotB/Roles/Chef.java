@@ -41,7 +41,7 @@ public class Chef extends Role {
     @Override
     public ActionLog falseFirstNightAction(Game game) {
         // prompt storyteller to provide some number
-        int evilPairs = game.getGrimoire().getNumber(game.getStoryteller(), "Provide a number of evil pairs to show the drunk/poisoned Chef.");
+        int evilPairs = game.getGrimoire().getNumberFromPerformer(game.getStoryteller(), "Provide a number of evil pairs to show the drunk/poisoned Chef.");
         game.getGrimoire().basicMessage(game.getPlayerByRole("Chef"), "There are " + evilPairs + " pairs of evil players sitting next to each other.");
         return new ActionLog(game.getStoryteller(), "chef", true, Integer.toString(evilPairs), null);
     }
@@ -55,8 +55,19 @@ public class Chef extends Role {
         sortedPlayers = game.sortPlayersBySeatOrder(sortedPlayers);
         for (PlayerPerformer player : sortedPlayers) {
             if (lastPlayer != null) {
-                if ((lastPlayer.getRole().getTeam().equals(Team.EVIL))
-                && (player.getRole().getTeam().equals(Team.EVIL))) {
+                // TODO fix this to work better with false team roles like recluse
+                if ((lastPlayer.getRole().getTeam(
+                    game.getGrimoire(),
+                    game.getPlayerByRole("Chef").getName(),
+                    "Chef",
+                    lastPlayer.getName())
+                    .equals(Team.EVIL))
+                && (player.getRole().getTeam(
+                    game.getGrimoire(),
+                    game.getPlayerByRole("Chef").getName(),
+                    "Chef",
+                    player.getName())
+                    .equals(Team.EVIL))) {
                     evilPairs++;
                 }
             }
@@ -65,8 +76,18 @@ public class Chef extends Role {
         if (lastPlayer == null) {
             throw new IllegalStateException("Unexpected Null Player in Chef.countEvilPairs()");
         }
-        if ((sortedPlayers.getFirst().getRole().getTeam().equals(Team.EVIL))
-        && (lastPlayer.getRole().getTeam().equals(Team.EVIL))) {
+        if ((sortedPlayers.getFirst().getRole().getTeam(
+            game.getGrimoire(),
+            game.getPlayerByRole("Chef").getName(),
+            "Chef",
+            sortedPlayers.getFirst().getName())
+            .equals(Team.EVIL))
+        && (lastPlayer.getRole().getTeam(
+            game.getGrimoire(),
+            game.getPlayerByRole("Chef").getName(),
+            "Chef",
+            lastPlayer.getName())
+            .equals(Team.EVIL))) {
             evilPairs++;
         }
         return evilPairs;

@@ -459,7 +459,7 @@ public class Main extends JavaPlugin implements Listener {
                     "INSERT INTO user_game_roles (game_id, uuid, role_id, action_id) VALUES (?, ?, (SELECT role_id FROM roles WHERE role_name = ?), ?)")) {
                 stmt.setInt(1, gameId);
                 stmt.setString(2, performer.getUUID());
-                stmt.setString(3, performer.getRole().getRoleName().toLowerCase());
+                stmt.setString(3, performer.getRole().getRoleNameActual().toLowerCase());
                 if (actionId == 0) {
                     stmt.setNull(4, java.sql.Types.INTEGER);
                 } else {
@@ -503,8 +503,8 @@ public class Main extends JavaPlugin implements Listener {
                 "INSERT INTO actions (game_id, uuid, team_id, role_id, action_day, action_type, action_contains_lie, action_has_targets, action_date_time, action_notes) VALUES (?, ?, (SELECT team_id FROM teams WHERE team_name = ?), (SELECT role_id FROM roles WHERE role_name = ?), ?, ?, ?, ?, (NOW()), ?)")) {
             stmt.setInt(1, gameId);
             stmt.setString(2, performer.getUUID());
-            stmt.setString(3, performer.getRole().getTeam().toString().toLowerCase());
-            stmt.setString(4, performer.getRole().getRoleName().toLowerCase());
+            stmt.setString(3, performer.getRole().getTeamActual().toString().toLowerCase());
+            stmt.setString(4, performer.getRole().getRoleNameActual().toLowerCase());
             stmt.setInt(5, actionDay);
             stmt.setString(6, actionType);
             stmt.setBoolean(7, actionContainsLie);

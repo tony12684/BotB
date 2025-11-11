@@ -13,8 +13,8 @@ public class ActionLog {
 
     public ActionLog(Performer actingPerformer, String actionType, boolean actionContainsLie, String actionNotes, List<Performer> actionTargets) {
         this.performerUUID = actingPerformer.getUUID();
-        this.performerTeamName = actingPerformer.getRole().getTeam().toString().toLowerCase();
-        this.performerRoleName = actingPerformer.getRole().getRoleName().toLowerCase().replace("_", " ");
+        this.performerTeamName = actingPerformer.getRole().getTeamActual().toString().toLowerCase();
+        this.performerRoleName = actingPerformer.getRole().getRoleNameActual().toLowerCase().replace("_", " ");
         this.actionType = actionType;
         this.actionContainsLie = actionContainsLie;
         this.actionHasTargets = (actionTargets == null || !actionTargets.isEmpty());
