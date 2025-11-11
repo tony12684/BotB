@@ -12,7 +12,7 @@ import io.github.tony12684.BotB.Role;
 
 public class Drunk extends Role {
     public Drunk(Role falseRole) {
-        super("Drunk", "Outsider");
+        super("Drunk", Affiliation.OUTSIDER, Team.GOOD);
         this.setFalseRole(falseRole);
     }
 }

@@ -13,6 +13,6 @@ import io.github.tony12684.BotB.Role;
 
 public class Spy extends Role {
     public Spy() {
-        super("Spy", "Minion");
+        super("Spy", Affiliation.MINION, Team.EVIL);
     }
 }

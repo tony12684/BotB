@@ -1,7 +1,11 @@
 package io.github.tony12684.BotB.Roles;
 import io.github.tony12684.BotB.Role;
+import io.github.tony12684.BotB.ActionLog;
 import io.github.tony12684.BotB.Game;
+import io.github.tony12684.BotB.Performer;
 import io.github.tony12684.BotB.PlayerPerformer;
+
+import java.util.List;
 
 /*
  * Butler - Outsider
@@ -9,29 +13,57 @@ import io.github.tony12684.BotB.PlayerPerformer;
  * No special setup.
  * First night action.
  * Other night action.
+ * Vote action restriction based on master's vote.
  */
 
 public class Butler extends Role {
+    private PlayerPerformer master = null;
 
     public Butler() {
-        super("Butler", "Outsider");
+        super("Butler", Affiliation.OUTSIDER, Team.GOOD);
     }
 
     @Override
-    public boolean firstNightAction(Game game) {
+    public ActionLog firstNightAction(Game game) {
         return pickMaster(game);
     }
 
     @Override
-    public boolean otherNightAction(Game game) {
+    public ActionLog otherNightAction(Game game) {
         return pickMaster(game);
-
     }
 
-    private boolean pickMaster(Game game) {
-        // Prompt the Butler to pick a master player
-        // TODO get user input that returns an in game player alive or dead except themselves
-        // this.master = chosenPlayer;
-        return true;
+    @Override
+    public ActionLog falseFirstNightAction(Game game) {
+        // No modification required for drunk and poisoned butler.
+        // prompt storyteller to provide some number
+        return null;
+    }
+    
+    @Override
+    public ActionLog falseOtherNightAction(Game game) {
+        // No modification required for drunk and poisoned butler.
+        return pickMaster(game);
+    }
+
+    private ActionLog pickMaster(Game game) {
+        // get master choice from Butler
+        master = null;
+        while (master == null) {
+            master = game.getGrimoire().getFreeTargetsFromPerformer(game.getPlayerByRole("Butler"), 1, "Choose your master. You cannot choose yourself.").getFirst();
+            if (master.getUUID().equals(game.getPlayerByRole("Butler").getUUID())) {
+                game.getGrimoire().errorMessage(game.getPlayerByRole("Butler"), "You cannot choose yourself as your master. Please select again.");
+                master = null;
+            }
+        }
+        List<Performer> targets = List.of(master);
+        return new ActionLog(game.getPlayerByRole("Butler"), "butler_master_choice", true, null, targets);
+    }
+    
+
+    @Override
+    public ActionLog voteAction(Game game) {
+        // TODO implement vote restriction based on master's vote
+        return null;
     }
 }

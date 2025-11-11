@@ -1,0 +1,36 @@
+quick parse the old datapack file structure for any other relevant notes
+
+TODO list
+    adjust role_ids.yaml handling to accomidate new role additions.
+        maybe just add in the travellers and fabled now??
+
+    update spigot
+    fix world spawn angle
+    init static voice channels automatically without modification of files
+    add ability to see voice channel when you are in it
+    get nickname plugin for the server that can be adjusted via API
+    reset used datapack "variables" and gut the tower
+    grimoire script viewer and creator
+    maintain codebase to allow for custom roles to be added in
+    auto setup
+        houses
+        roles
+        storyteller manual setup/ adjustment mode
+    player locations viewer map
+        for storyteller to keep tabs (and for players?)
+    spawn protection to prevent player item theft
+    in game role descriptions viewer
+    accommodation for legion role
+    storyteller soundboard
+    cinematic player deaths
+    players can voice chat at night toggle
+    player speaking privileges revoker setting (for nomination and votes)
+    reduce player information at night
+        prevent player audio at night (nobody else hears your door spam)
+    prevent player spawn resetting
+    enhanced spectate system for non players?
+    game stats tracking
+        game summary(outline? playByPlay? replay? overview? recap? report?)
+    end game method
+    flashback game recordings?
+

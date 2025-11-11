@@ -11,7 +11,8 @@ import io.github.tony12684.BotB.Role;
 
 
 public class Baron extends Role {
+    // Assumes external management of extra Outsiders
     public Baron() {
-        super("Baron", "Minion");
+        super("Baron", Affiliation.MINION, Team.EVIL);
     }
 }

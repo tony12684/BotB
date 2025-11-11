@@ -11,6 +11,6 @@ import io.github.tony12684.BotB.Role;
 
 public class Washerwoman extends Role {
     public Washerwoman() {
-        super("Washerwoman", "Townsfolk");
+        super("Washerwoman", Affiliation.TOWNSFOLK, Team.GOOD);
     }
 }

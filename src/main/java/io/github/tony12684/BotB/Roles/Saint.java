@@ -12,6 +12,6 @@ import io.github.tony12684.BotB.Role;
 
 public class Saint extends Role {
     public Saint() {
-        super("Saint", "Outsider");
+        super("Saint", Affiliation.OUTSIDER, Team.GOOD);
     }
 }

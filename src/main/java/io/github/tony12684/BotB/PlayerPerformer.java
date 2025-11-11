@@ -4,43 +4,54 @@ public class PlayerPerformer extends Performer{
     private boolean drunk = false; // Indicates if the player is drunk
     private boolean poisoned = false; // Indicates if the player is poisoned
     private boolean alive = true; // Indicates if the player is alive
-    private PlayerPerformer rightNeighbor; // Player's right neighbor
-    private PlayerPerformer leftNeighbor; // Player's left neighbor
     private int seat; // Player's seat number
-    public PlayerPerformer(String uuid, Role role) {
+    // Left neighbor is +1 seat, right neighbor is -1 seat by default
+    private PlayerPerformer leftNeighbor = null; // Reference to the left neighbor
+    private PlayerPerformer rightNeighbor = null; // Reference to the right neighbor
+    public PlayerPerformer(String uuid, Role role, String name) {
         // Constructor for PlayerPerformer class
-        super(uuid, role);
+        super(uuid, role, name);
+    }
+
+    public boolean getDrunk() {
+        return drunk;
+    }
+    public void setDrunk(boolean drunk) {
+        this.drunk = drunk;
+    }
+
+    public boolean getPoisoned() {
+        return poisoned;
+    }
+    public void setPoisoned(boolean poisoned) {
+        this.poisoned = poisoned;
+    }
+    
+    public boolean getAlive() {
+        return alive;
+    }
+    public void setAlive(boolean alive) {
+        this.alive = alive;
     }
 
     public int getSeat() {
         return seat;
     }
-
     public void setSeat(int seat) {
         this.seat = seat;
     }
 
-    public boolean isDrunk() {
-        return drunk;
+    public PlayerPerformer getLeftNeighbor() {
+        return leftNeighbor;
+    }
+    public void setLeftNeighbor(PlayerPerformer leftNeighbor) {
+        this.leftNeighbor = leftNeighbor;
     }
 
-    public void setDrunk(boolean drunk) {
-        this.drunk = drunk;
+    public PlayerPerformer getRightNeighbor() {
+        return rightNeighbor;
     }
-
-    public boolean isAlive() {
-        return alive;
-    }
-
-    public void setAlive(boolean alive) {
-        this.alive = alive;
-    }
-
-    public boolean isPoisoned() {
-        return poisoned;
-    }
-
-    public void setPoisoned(boolean poisoned) {
-        this.poisoned = poisoned;
+    public void setRightNeighbor(PlayerPerformer rightNeighbor) {
+        this.rightNeighbor = rightNeighbor;
     }
 }

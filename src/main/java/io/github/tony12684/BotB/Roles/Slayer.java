@@ -12,6 +12,6 @@ import io.github.tony12684.BotB.Role;
 
 public class Slayer extends Role {
     public Slayer() {
-        super("Slayer", "Townsfolk");
+        super("Slayer", Affiliation.TOWNSFOLK, Team.GOOD);
     }
 }

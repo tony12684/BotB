@@ -13,6 +13,6 @@ import io.github.tony12684.BotB.Role;
 
 public class Poisoner extends Role {
     public Poisoner() {
-        super("Poisoner", "Minion");
+        super("Poisoner", Affiliation.MINION, Team.EVIL);
     }
 }

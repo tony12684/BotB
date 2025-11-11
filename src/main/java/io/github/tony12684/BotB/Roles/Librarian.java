@@ -11,6 +11,6 @@ import io.github.tony12684.BotB.Role;
 
 public class Librarian extends Role {
     public Librarian() {
-        super("Librarian", "Townsfolk");
+        super("Librarian", Affiliation.TOWNSFOLK, Team.GOOD);
     }
 }

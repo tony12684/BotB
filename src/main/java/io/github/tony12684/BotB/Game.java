@@ -1,4 +1,6 @@
 package io.github.tony12684.BotB;
+import io.github.tony12684.BotB.Role.Affiliation;
+import io.github.tony12684.BotB.Roles.Storyteller;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,7 +18,6 @@ public class Game {
     private StorytellerPerformer storyteller; // Performer object of the storyteller player
     private Grimoire grimoire; // Grimoire object for the storyteller
     private List<PlayerPerformer> players; // List of non storyteller PlayerPerformers
-    private List<Role> publicRoles; // List of Role objects for available "bluff" roles
     private Main plugin;
     
     public Game(Main plugin, String storytellerUUID, List<String> playerUUIDs) {
@@ -33,12 +34,15 @@ public class Game {
             crashGame("Database error on game start: " + e.getMessage(), storytellerUUID);
         }
 
-        
-        this.storyteller = new StorytellerPerformer(storytellerUUID, new Role("Storyteller", "Storyteller"));
-        this.grimoire = new Grimoire(storytellerUUID);
+        // TODO update this to accept fabled storytellers
+        this.storyteller = new StorytellerPerformer(storytellerUUID, new Storyteller(), Bukkit.getPlayer(storytellerUUID).getName());
+        this.grimoire = new Grimoire(storyteller, this);
 
+
+        // Build players list
         for (String uuid : playerUUIDs) {
-            players.add(new PlayerPerformer(uuid, null)); // Role to be assigned later
+            players.add(new PlayerPerformer(uuid, null, Bukkit.getPlayer(uuid).getName())); // Role to be assigned later
+            // TODO adjust for nickname plugin support
         }
 
         //TODO probably move all this to Game.startGame()
@@ -52,7 +56,8 @@ public class Game {
 
         firstNight(players); // Proceed to the first night phase
         //TODO build daytime, voting and subsequent night phases loop
-        
+        //TODO build drunk false role handling into Game class action logic
+
     }
 
     private int saveGameStart() {
@@ -70,6 +75,7 @@ public class Game {
 
     public List<PlayerPerformer> getPlayers() {
         // Return a copy of the players list to prevent external modification
+        // TODO pass the actual list reference?
         List<PlayerPerformer> copy = new ArrayList<>();
         for (PlayerPerformer player : players) {
             copy.add(player);
@@ -77,9 +83,15 @@ public class Game {
         return copy;
     }
 
+    public Grimoire getGrimoire() {
+        return grimoire;
+    }
+
     public PlayerPerformer getPlayerByRole(String roleName) {
+        // Expects that only one player has the specified role
+        // TODO make this more efficent with a map?
         for (PlayerPerformer player : players) {
-            if (player.getRole().getRoleName().equals(roleName)) {
+            if (player.getRole().getRoleNameActual().equals(roleName)) {
                 return player;
             }
         }
@@ -87,8 +99,8 @@ public class Game {
     }
 
     public StorytellerPerformer getStoryteller() {
-        // Return a copy of the storyteller performer to prevent external modification
-        StorytellerPerformer storyteller = new StorytellerPerformer(this.storyteller.getUUID(), this.storyteller.getRole());
+        // Return the storyteller performer
+        // aliasing not an issue since StorytellerPerformer is final
         return storyteller;
     }
 
@@ -119,10 +131,22 @@ public class Game {
         int playerCount = sortedPlayers.size();
         for (int i = 0; i < playerCount; i++) {
             PlayerPerformer currentPlayer = sortedPlayers.get(i);
-            PlayerPerformer leftNeighbor = sortedPlayers.get((i - 1 + playerCount) % playerCount);
-            PlayerPerformer rightNeighbor = sortedPlayers.get((i + 1) % playerCount);
-            currentPlayer.setLeftNeighbor(leftNeighbor);
+            PlayerPerformer rightNeighbor;
+            PlayerPerformer leftNeighbor;
+            // first persons right neighbor is last person
+            if (i == 0) {
+                rightNeighbor = players.get(playerCount - 1);
+            } else {
+                rightNeighbor = players.get(i - 1);
+            }
+            // last persons left neighbor is first person
+            if (i == playerCount - 1) {
+                leftNeighbor = players.get(0);
+            } else {
+                leftNeighbor = players.get(i + 1);
+            }
             currentPlayer.setRightNeighbor(rightNeighbor);
+            currentPlayer.setLeftNeighbor(leftNeighbor);
         }
     }
 
@@ -165,21 +189,23 @@ public class Game {
     private List<PlayerPerformer> getAllMinions(List<PlayerPerformer> players) {
         List<PlayerPerformer> minions = new ArrayList<>();
         for (PlayerPerformer player : players) {
-            if (player.getRole().getTeam().equals("Minion")) {
+            if (player.getRole().getAffiliationActual().equals(Affiliation.MINION)) {
                 minions.add(player);
             }
         }
         return minions;
     }
 
-    private PlayerPerformer getDemon(List<PlayerPerformer> players) {
+    private List<PlayerPerformer> getDemons(List<PlayerPerformer> players) {
+        // Return a list of all Demon players in the game
+        // Pit Hag can make more than one Demon
+        List<PlayerPerformer> demons = new ArrayList<>();
         for (PlayerPerformer player : players) {
-            if (player.getRole().getTeam().equals("Demon")) {
-                return player;
+            if (player.getRole().getAffiliationActual().equals(Affiliation.DEMON)) {
+                demons.add(player);
             }
         }
-        crashGame("No demon found in Game.getDemon()!", storyteller.getUUID());
-        return null; // This line should never be reached
+        return demons;
     }
 
     private void firstNight(List<PlayerPerformer> players) {
@@ -188,13 +214,14 @@ public class Game {
         this.dayCount = 1;
         notifyPlayersOfRoles(players);
         List<PlayerPerformer> minions = getAllMinions(players);
-        PlayerPerformer demon = getDemon(players);
-        minionInfo(minions, demon);
+        List<PlayerPerformer> demons = getDemons(players);
+        minionInfo(minions, demons.getFirst()); // Assumes 1 demon at start of game
         List<Role> bluffs = getBluffRoles();
-        demonInfo(demon, minions, bluffs);
+        demonInfo(demons.getFirst(), minions, bluffs);
+        // TODO add storyteller to action list to accomidate fabled roles
         sortPlayersByActionPriority(players);
         for (PlayerPerformer player : players) {
-            if (player.isDrunk() || player.isPoisoned()) {
+            if (player.getDrunk() || player.getPoisoned()) {
                 //TODO implement drunk and poisoned logic
                 // Prompt storyteller for action resolution
             } else {
@@ -217,12 +244,12 @@ public class Game {
             if (bukkitPlayer != null && bukkitPlayer.isOnline()) {
                 StringBuilder message;
                 if (player.getRole().getFalseRole() != null) { // If the role has a false role, show that instead
-                    message = new StringBuilder(ChatColor.GRAY + "You are the " + player.getRole().getFalseRole().getRoleName() + ".\n");
-                    message.append("Your team is: ").append(player.getRole().getFalseRole().getTeam()).append("\n");
+                    message = new StringBuilder(ChatColor.GRAY + "You are the " + player.getRole().getFalseRole().getRoleNameActual() + ".\n");
+                    message.append("Your team is: ").append(player.getRole().getFalseRole().getTeamActual().toString()).append("\n");
                     message.append(player.getRole().getFalseRole().getStartingMessage());
                 } else {
-                    message = new StringBuilder(ChatColor.GRAY + "You are the " + player.getRole().getRoleName() + ".\n");
-                    message.append("Your team is: ").append(player.getRole().getTeam()).append("\n");
+                    message = new StringBuilder(ChatColor.GRAY + "You are the " + player.getRole().getRoleNameActual() + ".\n");
+                    message.append("Your team is: ").append(player.getRole().getTeamActual().toString()).append("\n");
                     message.append(player.getRole().getStartingMessage());
                 }
                 bukkitPlayer.sendMessage(message.toString());
@@ -277,9 +304,10 @@ public class Game {
             if (!bluffRoles.isEmpty()) {
                 info.append("Available Bluff Roles:\n");
                 for (Role bluff : bluffRoles) {
-                    info.append("- ").append(bluff.getRoleName()).append("\n");
+                    info.append("- ").append(bluff.getRoleNameActual()).append("\n");
                 }
             } else {
+                // This should never happen in a standard game
                 info.append("No Bluff Roles available.\n");
             }
             player.sendMessage(info.toString());

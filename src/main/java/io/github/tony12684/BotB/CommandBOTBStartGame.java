@@ -25,7 +25,7 @@ public class CommandBOTBStartGame implements CommandExecutor{
         playerUUIDs.remove(storytellerUUID); //remove storyteller from player list
         // get instance of Main plugin
         Main plugin = Main.getPlugin(Main.class);
-        Game game = new Game(plugin, storytellerUUID, playerUUIDs);
+        new Game(plugin, storytellerUUID, playerUUIDs);
         sender.sendMessage("Game starting with you as the storyteller!");
         return true;
     }

@@ -11,6 +11,6 @@ import io.github.tony12684.BotB.Role;
 
 public class Investigator extends Role {
     public Investigator() {
-        super("Investigator", "Townsfolk");
+        super("Investigator", Affiliation.TOWNSFOLK, Team.GOOD);
     }
 }

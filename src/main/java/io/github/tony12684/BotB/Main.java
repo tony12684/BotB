@@ -21,6 +21,7 @@ import com.craftmend.openaudiomc.api.clients.Client;
 import com.craftmend.openaudiomc.api.VoiceApi;
 
 import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
+
 import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -33,12 +34,6 @@ import org.yaml.snakeyaml.constructor.Constructor;
 
 import java.io.IOException;
 import java.io.InputStream;
-
-//TODO update spigot api to latest version when possible
-
-//TODO front end: find an easy way to mock up
-//TODO middle ware: build object and logic
-//TODO back end: build database and basic crud operations
 
 public class Main extends JavaPlugin implements Listener {
     final boolean debugMode = true;
@@ -359,6 +354,7 @@ public class Main extends JavaPlugin implements Listener {
 
     public boolean initRolesInDB() {
         //load roles from yaml and insert them into the database
+        // rebuild if role list changes?
         Yaml yaml = new Yaml();
         try (InputStream in = Main.class.getResourceAsStream("/role_ids.yaml")) {
             if (in == null) {
@@ -389,34 +385,23 @@ public class Main extends JavaPlugin implements Listener {
 
     public boolean initTeamsInDB() {
         //put team names into teams reference table
-        try (Connection conn = getConn();
-            PreparedStatement stmt = conn.prepareStatement(
-                "INSERT INTO teams (team_name) VALUES (?) ON DUPLICATE KEY UPDATE team_name = team_name")) {
-            String[] teams = {"Townsfolk", "Outsiders", "Minions", "Demons"};
-            for (String teamName : teams) {
+        // Ensure team names match Affiliation enum names
+        String[] teams = {"good", "evil", "storyteller"};
+        for (String teamName : teams) {
+            try (Connection conn = getConn();
+                 PreparedStatement stmt = conn.prepareStatement(
+                     "INSERT INTO teams (team_name) VALUES (?) ON DUPLICATE KEY UPDATE team_name = team_name")) {
                 stmt.setString(1, teamName);
                 stmt.executeUpdate();
+            } catch (Exception e) {
+                getLogger().severe("Failed to initialize teams in database for team '" + teamName + "': " + e.getMessage());
+                return false;
             }
-        } catch (Exception e) {
-            getLogger().severe("Failed to initialize teams in database: " + e.getMessage());
-            return false;
         }
         return true;
     }
 
-    public int insertGameStartToDB() {
-        // Initialize a new game into the database
-        try (Connection conn = getConn();
-            PreparedStatement stmt = conn.prepareStatement("INSERT INTO games (game_start_date_time) VALUES (NOW())")) {
-            int gameId = stmt.executeUpdate();
-            return gameId;
-        } catch (Exception e) {
-            throw new RuntimeException("Database insertion error in insertGameStartToDB(): " + e.getMessage());
-        }
-    }
-
-
-    public int insertNewUser(String playerUUID, String playerName) {
+    public int insertUser(String playerUUID, String playerName) {
         // Insert a new user into the database
         // TODO fire this code on user join
         try (Connection conn = getConn();
@@ -432,6 +417,17 @@ public class Main extends JavaPlugin implements Listener {
         }
     }
 
+    public int insertGameStartToDB() {
+        // Initialize a new game into the database
+        try (Connection conn = getConn();
+            PreparedStatement stmt = conn.prepareStatement("INSERT INTO games (game_start_date_time) VALUES (NOW())")) {
+            int gameId = stmt.executeUpdate();
+            return gameId;
+        } catch (Exception e) {
+            throw new RuntimeException("Database insertion error in insertGameStartToDB(): " + e.getMessage());
+        }
+    }
+
     public Map<String, Integer> insertGameUsers(int gameId, List<String> playerUUIDs) {
         // Insert all users in a game into the user_games table for that game
         // One entry per user per game
@@ -439,9 +435,9 @@ public class Main extends JavaPlugin implements Listener {
         for (String playerUUID : playerUUIDs) {
             try (Connection conn = getConn();
                 PreparedStatement stmt = conn.prepareStatement(
-                    "INSERT INTO user_games (uuid, game_id) VALUES (?, ?)")) {
-                stmt.setString(1, playerUUID);
-                stmt.setInt(2, gameId);
+                    "INSERT INTO user_games (game_id, uuid) VALUES (?, ?)")) {
+                stmt.setInt(1, gameId);
+                stmt.setString(2, playerUUID);
                 int row = stmt.executeUpdate();
                 rows.put(playerUUID, row);
 
@@ -450,6 +446,76 @@ public class Main extends JavaPlugin implements Listener {
             }
         }
         return rows;
+    }
+
+    public Map<String, Integer> insertGameRoles(int gameId, List<PlayerPerformer> playerPerformers, int actionId) {
+        // Insert all user roles in a game into the user_game_roles table for that game
+        // One entry per user per game
+        // use actionId = 0 for no action associated with role assignment
+        Map<String, Integer> rows = new HashMap<String,Integer>();
+        for (PlayerPerformer performer : playerPerformers) {
+            try (Connection conn = getConn();
+                PreparedStatement stmt = conn.prepareStatement(
+                    "INSERT INTO user_game_roles (game_id, uuid, role_id, action_id) VALUES (?, ?, (SELECT role_id FROM roles WHERE role_name = ?), ?)")) {
+                stmt.setInt(1, gameId);
+                stmt.setString(2, performer.getUUID());
+                stmt.setString(3, performer.getRole().getRoleNameActual().toLowerCase());
+                if (actionId == 0) {
+                    stmt.setNull(4, java.sql.Types.INTEGER);
+                } else {
+                    stmt.setInt(4, actionId);
+                }
+                int row = stmt.executeUpdate();
+                rows.put(performer.getUUID(), row);
+
+            } catch (Exception e) {
+                throw new RuntimeException("Database insertion error in insertGameRoles(): " + e.getMessage());
+            }
+        }
+        return rows;
+    }
+
+    public Map<String, Integer> insertGameTeams(int gameId, List<PlayerPerformer> playerPerformers, int actionId) {
+        // Insert all user teams in a game into the user_game_teams table for that game
+        // One entry per user per game
+        Map<String, Integer> rows = new HashMap<String,Integer>();
+        for (PlayerPerformer performer : playerPerformers) {
+            try (Connection conn = getConn();
+                PreparedStatement stmt = conn.prepareStatement(
+                    "INSERT INTO user_game_teams (game_id, uuid, team_id) VALUES (?, ?, (SELECT team_id FROM teams WHERE team_name = ?))")) {
+                stmt.setInt(1, gameId);
+                stmt.setString(2, performer.getUUID());
+                stmt.setString(3, performer.getRole().toString().toLowerCase());
+                int row = stmt.executeUpdate();
+                rows.put(performer.getUUID(), row);
+
+            } catch (Exception e) {
+                throw new RuntimeException("Database insertion error in insertGameTeams(): " + e.getMessage());
+            }
+        }
+        return rows;
+    }
+
+    public int insertAction(int gameId, Performer performer, int actionDay, String actionType, Boolean actionContainsLie, Boolean actionHasTargets, String actionNotes) {
+        // Insert a new action into the database
+        try (Connection conn = getConn();
+            PreparedStatement stmt = conn.prepareStatement(
+                "INSERT INTO actions (game_id, uuid, team_id, role_id, action_day, action_type, action_contains_lie, action_has_targets, action_date_time, action_notes) VALUES (?, ?, (SELECT team_id FROM teams WHERE team_name = ?), (SELECT role_id FROM roles WHERE role_name = ?), ?, ?, ?, ?, (NOW()), ?)")) {
+            stmt.setInt(1, gameId);
+            stmt.setString(2, performer.getUUID());
+            stmt.setString(3, performer.getRole().getTeamActual().toString().toLowerCase());
+            stmt.setString(4, performer.getRole().getRoleNameActual().toLowerCase());
+            stmt.setInt(5, actionDay);
+            stmt.setString(6, actionType);
+            stmt.setBoolean(7, actionContainsLie);
+            stmt.setBoolean(8, actionHasTargets);
+            if (actionNotes == null) { actionNotes = ""; }
+            stmt.setString(9, actionNotes);
+            int row = stmt.executeUpdate();
+            return row;
+        } catch (Exception e) {
+            throw new RuntimeException("Database insertion error in insertAction(): " + e.getMessage());
+        }
     }
 
     //add grimoire state to the action notes for spy SOMEHOW
