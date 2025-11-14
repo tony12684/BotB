@@ -29,13 +29,9 @@ public class Chef extends Role {
         if (chef == null) {
             throw new IllegalStateException("Chef player not found in game during first night action.");
         }
-        try {
-            Integer evilPairs = countEvilPairs(game);
-            game.getGrimoire().basicMessage(chef, "There are " + evilPairs + " pairs of evil players sitting next to each other.");
-            return new ActionLog(chef, "chef", false, evilPairs.toString(), null);
-        } catch (Exception e) {
-            throw e; // rethrow after logging
-        }
+        Integer evilPairs = countEvilPairs(game);
+        game.getGrimoire().basicMessage(chef, "There are " + evilPairs + " pairs of evil players sitting next to each other.");
+        return new ActionLog(chef, "chef", false, evilPairs.toString(), null);
     }
 
     @Override
@@ -53,6 +49,9 @@ public class Chef extends Role {
         int evilPairs = 0;
         List<PlayerPerformer> sortedPlayers = game.getPlayers();
         sortedPlayers = game.sortPlayersBySeatOrder(sortedPlayers);
+        if (game.getInfoOverrideInGame(sortedPlayers)) { // if recluse or similar is in game, ask storyteller
+            return game.getGrimoire().getNumberFromPerformer(game.getStoryteller(), "How many evil pairs does the Chef see? \nConsider roles such as Recluse that may affect this count.");
+        } // TODO improve this so that storyteller is only prompted when necessary
         for (PlayerPerformer player : sortedPlayers) {
             if (lastPlayer != null) {
                 // TODO fix this to work better with false team roles like recluse

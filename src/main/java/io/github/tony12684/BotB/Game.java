@@ -193,6 +193,15 @@ public class Game {
         return demons;
     }
 
+    public boolean getInfoOverrideInGame(List<PlayerPerformer> players) {
+        for (PlayerPerformer player : players) {
+            if (player.getRole().getInfoOverride()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void firstNight(List<PlayerPerformer> players) {
         // Handle the first night phase of the game
         this.gameState = "nighttime";

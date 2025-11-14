@@ -1,5 +1,7 @@
 package io.github.tony12684.BotB;
 
+import java.util.List;
+
 public class Role {
     private String roleName; // Name of the role
     private Affiliation affiliation; // Townsfolk, Outsider, Minion, Demon, Traveler, etc.
@@ -7,6 +9,7 @@ public class Role {
     private String startingMessage = "Have fun!"; // Message sent to player when assigned this role
     private int actionPriority; // Priority of the role's action during the night phase (lower number = higher priority)
     private Role falseRole; // A false role to display to the player instead of their actual role
+    private boolean infoOverride = false; // Whether the role has an info override for actions like recluse
 
     public enum Affiliation {
         TOWNSFOLK,
@@ -102,6 +105,13 @@ public class Role {
 
     public void setActionPriority(int actionPriority) {
         this.actionPriority = actionPriority;
+    }
+
+    public boolean getInfoOverride() {
+        return infoOverride;
+    }
+    public void setInfoOverride(boolean infoOverride) {
+        this.infoOverride = infoOverride;
     }
 
     // TODO overhaul setup and action methods to return information nessessary for logging the actions

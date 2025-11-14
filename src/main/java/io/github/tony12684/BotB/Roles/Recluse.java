@@ -14,6 +14,7 @@ import io.github.tony12684.BotB.Role;
 public class Recluse extends Role {
     public Recluse() {
         super("Recluse", Affiliation.OUTSIDER, Team.GOOD);
+        this.setInfoOverride(true);
     }
     @Override
     public Team getTeam(Grimoire grimoire, String requestingName, String requestingRole, String targetName) {
