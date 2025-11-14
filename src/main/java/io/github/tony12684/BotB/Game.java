@@ -19,6 +19,7 @@ public class Game {
     private Grimoire grimoire; // Grimoire object for the storyteller
     private List<PlayerPerformer> players; // List of non storyteller PlayerPerformers
     private Main plugin;
+    private int gameId;
     
     public Game(Main plugin, String storytellerUUID, List<String> playerUUIDs) {
         //Constructor for Game class
@@ -28,7 +29,7 @@ public class Game {
         this.dayCount = 0;
         this.plugin = plugin;
         try {
-            int gameId = plugin.insertGameStartToDB();
+            this.gameId = plugin.insertGameStartToDB();
             Bukkit.getLogger().info("Game started with ID: " + gameId);
         } catch (Exception e) {
             crashGame("Database error on game start: " + e.getMessage(), storytellerUUID);
@@ -44,15 +45,16 @@ public class Game {
             players.add(new PlayerPerformer(uuid, null, Bukkit.getPlayer(uuid).getName())); // Role to be assigned later
             // TODO adjust for nickname plugin support
         }
+        // TODO log players to game_users
 
         //TODO probably move all this to Game.startGame()
         assignSeats(players);
         linkNeighbors(players);
 
-        List<Role> roleList = getRoleList();
-        assignRoles(players, roleList, storyteller.getUUID());
+        List<Role> roleList = grimoire.buildRoleList(players.size());
+        assignRoles(players, roleList);
 
-        //TODO log game starttime and player info to DB
+        // setupPhase();
 
         firstNight(players); // Proceed to the first night phase
         //TODO build daytime, voting and subsequent night phases loop
@@ -143,17 +145,7 @@ public class Game {
         }
     }
 
-    private List<Role> getRoleList() {
-        // Build and return a list of Role objects representing available roles
-        // Returned role list should account for team count modifiers e.g. +1 Townsfolk, -1 Outsider
-        List<Role> roles = new ArrayList<>();
-        //TODO build gui for role list selection
-        //TODO retrieve list of roles from storyteller
-        //TODO build automatic role list based on player count, validate with storyteller
-        return roles;
-    }
-
-    private void assignRoles(List<PlayerPerformer> players, List<Role> roleList, String storytellerUUID) {
+    private void assignRoles(List<PlayerPerformer> players, List<Role> roleList) {
         //TODO build to require storyteller validation
         // Randomly assign roles to players
         Collections.shuffle(roleList);
@@ -161,15 +153,15 @@ public class Game {
             if (!roleList.isEmpty()) {
                 player.setRole(roleList.remove(0));
             } else {
-                crashGame("Not enough roles for players!", storytellerUUID);
+                crashGame("Not enough roles for players!", storyteller.getUUID());
             }
         }
-        if (!roleList.isEmpty()) {crashGame("Unassigned roles remain!", storytellerUUID);}
+        if (!roleList.isEmpty()) {crashGame("Unassigned roles remain!", storyteller.getUUID());}
         // TODO validate with storyteller
         for (PlayerPerformer player : players) {
             player.getRole().setup(this);
         }
-        updateGrimoire(players, storytellerUUID);
+        updateGrimoire(this);
     }
 
     private List<Role> getBluffRoles() {
@@ -309,7 +301,7 @@ public class Game {
         }
     }
 
-    private void updateGrimoire(List<PlayerPerformer> players, String storytellerUUID) {
+    private void updateGrimoire(Game game) {
         // Update the storyteller's grimoire with current game information
         //TODO build this
     }

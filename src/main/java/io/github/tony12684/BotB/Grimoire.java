@@ -22,6 +22,11 @@ public class Grimoire {
         return storyteller;
     }
 
+    public List<Role> buildRoleList(int numberOfPlayers) {
+        // Method to build a list of roles based on the number of players
+        return null; // Placeholder return;
+    }   
+
     public void errorMessage(Performer performer, String message) {
         // Method to show error messages to a performer
     }
