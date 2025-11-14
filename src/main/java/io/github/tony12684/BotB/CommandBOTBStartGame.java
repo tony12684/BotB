@@ -1,5 +1,7 @@
 package io.github.tony12684.BotB;
 
+import java.util.List;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -9,8 +11,9 @@ public class CommandBOTBStartGame implements CommandExecutor{
     //Called when someone uses that /startgame command
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        // assign command sender as storyteller
         Player storyteller = (Player) sender;
-        String storytellerUUID = storyteller.getUniqueId().toString();
+        String storytellerUUID;
         if (sender instanceof Player) {
             storytellerUUID = storyteller.getUniqueId().toString();
         } else {
@@ -18,7 +21,7 @@ public class CommandBOTBStartGame implements CommandExecutor{
             return false;
         }
         // Start a new game with the specified storyteller UUID
-        java.util.List<String> playerUUIDs = new java.util.ArrayList<>();
+        List<String> playerUUIDs = new java.util.ArrayList<>();
         for (Player p : org.bukkit.Bukkit.getOnlinePlayers()) {
             playerUUIDs.add(p.getUniqueId().toString());
         }
