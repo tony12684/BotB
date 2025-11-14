@@ -29,7 +29,7 @@ public class Game {
         this.dayCount = 0;
         this.plugin = plugin;
         try {
-            this.gameId = plugin.insertGameStartToDB();
+            this.gameId = plugin.insertGameStart();
             Bukkit.getLogger().info("Game started with ID: " + gameId);
         } catch (Exception e) {
             crashGame("Database error on game start: " + e.getMessage(), storytellerUUID);
@@ -55,24 +55,14 @@ public class Game {
         assignRoles(players, roleList);
 
         // setupPhase();
+        // while loop through all setup actions and temp log their corresponding ActionLogs
+        // after the loop, process all setup ActionLogs
+        // build to a list of ActionLogs to process after all actions are taken
 
         firstNight(players); // Proceed to the first night phase
         //TODO build daytime, voting and subsequent night phases loop
         //TODO build drunk false role handling into Game class action logic
 
-    }
-
-    private int saveGameStart() {
-        //Add a new game entry to the database and return the game ID
-        plugin.getLogger().info("Saving game start to database...");
-        try {
-            int gameId = plugin.getNextGameIdFromDB();
-            return gameId;
-        } except (Exception e) {
-            // TODO use better exception typing
-            crashGame("Database error in saveGameStart(): " + e.getMessage(), storyteller.getUUID());
-            return -1;
-        }
     }
 
     public List<PlayerPerformer> getPlayers() {
