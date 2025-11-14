@@ -417,14 +417,14 @@ public class Main extends JavaPlugin implements Listener {
         }
     }
 
-    public int insertGameStartToDB() {
+    public int insertGameStart() {
         // Initialize a new game into the database
         try (Connection conn = getConn();
             PreparedStatement stmt = conn.prepareStatement("INSERT INTO games (game_start_date_time) VALUES (NOW())")) {
             int gameId = stmt.executeUpdate();
             return gameId;
         } catch (Exception e) {
-            throw new RuntimeException("Database insertion error in insertGameStartToDB(): " + e.getMessage());
+            throw new RuntimeException("Database insertion error in insertGameStart(): " + e.getMessage());
         }
     }
 

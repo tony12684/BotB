@@ -19,10 +19,17 @@ import java.util.List;
 
  //TODO implement action logging via SQL
 public class Chef extends Role {
+    int evilPairsSetup = -1;
     public Chef() {
         super("Chef", Affiliation.TOWNSFOLK, Team.GOOD);
     }
     
+    @Override
+    public ActionLog firstNightSetupMode(Game game) {
+        evilPairsSetup = countEvilPairs(game);
+        return new ActionLog(game.getStoryteller(), "chef_setup", false, null, null);
+    }
+
     @Override
     public ActionLog firstNightAction(Game game) {
         PlayerPerformer chef = game.getPlayerByRole("Chef");
@@ -45,6 +52,10 @@ public class Chef extends Role {
     private Integer countEvilPairs(Game game) {
         // for each sequential pair of players in seating order, check if both are evil
         // TODO redo with linked list implementation?
+        if (evilPairsSetup != -1) {
+            // only fires if chef isn't poisoned/drunk and already did setup
+            return evilPairsSetup; // return cached value calculated during setup
+        }
         PlayerPerformer lastPlayer = null;
         int evilPairs = 0;
         List<PlayerPerformer> sortedPlayers = game.getPlayers();

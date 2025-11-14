@@ -11,6 +11,7 @@ public class Grimoire {
     /*
      * handles storing, updating, and displaying game information to players
      * prompts storyteller and players for inputs and actions
+     * It is the grimoire's responsibility handle reminder tokens visibility
      */
     public Grimoire(StorytellerPerformer storyteller, Game game) {
         // Constructor for Grimoire class
@@ -22,10 +23,20 @@ public class Grimoire {
         return storyteller;
     }
 
+    public boolean getFirstNightSetupMode() {
+        // return true to prep the first night info for roles like chef, librarian, investigator, etc.
+        //     that have no player input on first night
+        return false; // Placeholder return;
+    }
+
     public List<Role> buildRoleList(int numberOfPlayers) {
         // Method to build a list of roles based on the number of players
         return null; // Placeholder return;
-    }   
+    }
+
+    public void basicMessage(Performer performer, String message) {
+        // Method to show basic messages to a performer
+    }
 
     public void errorMessage(Performer performer, String message) {
         // Method to show error messages to a performer
@@ -54,9 +65,5 @@ public class Grimoire {
     public Affiliation getAffiliationFromPerformer(Performer performer, String promptMessage) {
         // Method to get the affiliation of a performer
         return null; // Placeholder return;
-    }
-
-    public void basicMessage(Performer performer, String message) {
-        // Method to show action results to a performer
     }
 }

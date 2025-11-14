@@ -8,6 +8,8 @@ import io.github.tony12684.BotB.PlayerPerformer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.entity.Player;
+
 /*
 * Empath - Townsfolk
 * "Each night, you learn how many of your 2 alive neighbors are evil."
@@ -17,12 +19,25 @@ import java.util.List;
  */
 
 public class Empath extends Role {
+    int evilCountSetup = -1;
+    List<PlayerPerformer> neighborsSetup = new ArrayList<>();
     public Empath() {
         super("Empath", Affiliation.TOWNSFOLK, Team.GOOD);
+    } 
+
+    @Override
+    public ActionLog firstNightSetupMode(Game game) {
+        neighborsSetup = getLivingNeighbors(game);
+        evilCountSetup = countEvilPlayers(neighborsSetup, game);
+        return new ActionLog(game.getStoryteller(), "empath_setup", false, Integer.toString(evilCountSetup), new ArrayList<>(neighborsSetup));
     }
 
     @Override
     public ActionLog firstNightAction(Game game) {
+        if (evilCountSetup != -1) {
+            // only fires if empath isn't poisoned/drunk and already did setup
+            return new ActionLog(game.getPlayerByRole("Empath"), "empath", false, Integer.toString(evilCountSetup), new ArrayList<>(neighborsSetup));
+        }
         return empathy(game);
     }
     @Override
@@ -50,22 +65,9 @@ public class Empath extends Role {
         // get alive neighbors of the Empath player
         List<PlayerPerformer> neighbors = getLivingNeighbors(game);
         // count how many are evil
-        int evilCount = 0;
-        for (PlayerPerformer neighbor : neighbors) {
-            if (neighbor.getRole().getTeam(
-                game.getGrimoire(),
-                game.getPlayerByRole("Empath").getName(),
-                "Empath",
-                neighbor.getName()).equals(Team.EVIL)) {
-                evilCount++;
-            }
-        }
+        int evilCount = countEvilPlayers(neighbors, game);
         game.getGrimoire().basicMessage(game.getPlayerByRole("Empath"), "Your alive neighbors contain " + evilCount + " evil player(s).");
-        List<Performer> targets = new ArrayList<Performer>();
-        for (PlayerPerformer neighbor : neighbors) {
-            targets.add(neighbor);
-        }
-        return new ActionLog(game.getPlayerByRole("Empath"), "empath", false, Integer.toString(evilCount), targets);
+        return new ActionLog(game.getPlayerByRole("Empath"), "empath", false, Integer.toString(evilCount), new ArrayList<>(neighbors));
     }
 
     private List<PlayerPerformer> getLivingNeighbors(Game game) {
@@ -100,60 +102,19 @@ public class Empath extends Role {
 
         return neighbors;
     }
-    @Override
-    public boolean firstNightAction(Game game) {
-        boolean result = empathy(Game game);
-        return true;
-    }
-    @Override
-    public boolean otherNightAction(Game game) {
-        boolean result = empathy(Game game);
-        return true;
-    }
-
-    private boolean empathy(Game game) {
-        // Returns the two neighbors of the given player based on seat order
-        getLivingNeighbors(Game game, game.getPlayerByRole("Empath"));
-
-        return true;
-    }
-
-    private getLivingNeighbors(Game game, PlayerPerformer empath) {
-        List<PlayerPerformer> players = game.getPlayers();
-        players = game.sortPlayersBySeatOrder(players);
-        Int index = empath.getSeat(); // Seats are 1-indexed
-        PlayerPerformer leftNeighbor;
-        PlayerPerformer rightNeighbor;
-
-        if (index == 1) {
-            for (int i = 1; i =< players.size(); i++) {
-                //check each players to the right of the empath from max to min
-                PlayerPerformer player = players.get(players.size() - i);
-                if (player.isAlive()) {
-                    rightNeighbor = player;
-                    break;
-                }
-            }
-        } else {
-            leftNeighbor = players.get(index - 2); // -2 for 0-indexed list
-        }
-
-        if (index == players.size()) {
-            rightNeighbor = players.get(0); // Wrap around to first player
-        } else {
-            rightNeighbor = players.get(index); // index is already 0-indexed for right neighbor
-        }
-
-        List<PlayerPerformer> livingNeighbors = new ArrayList<>();
-        if (leftNeighbor.isAlive()) {
-            livingNeighbors.add(leftNeighbor);
-        }
-        if (rightNeighbor.isAlive()) {
-            livingNeighbors.add(rightNeighbor);
-        }
-        return livingNeighbors;
-
-    }
-
-
 }
+
+private int countEvilPlayers(List<PlayerPerformer> players, Game game) {
+        int evilCount = 0;
+        for (PlayerPerformer player : players) {
+            if (player.getRole().getTeam(
+                game.getGrimoire(),
+                game.getPlayerByRole("Empath").getName(),
+                "Empath",
+                player.getName()).equals(Team.EVIL)) 
+            {
+                evilCount++;
+            }
+        }
+        return evilCount;
+    }

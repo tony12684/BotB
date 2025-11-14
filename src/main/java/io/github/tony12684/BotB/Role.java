@@ -1,7 +1,5 @@
 package io.github.tony12684.BotB;
 
-import java.util.List;
-
 public class Role {
     private String roleName; // Name of the role
     private Affiliation affiliation; // Townsfolk, Outsider, Minion, Demon, Traveler, etc.
@@ -116,6 +114,10 @@ public class Role {
 
     // TODO overhaul setup and action methods to return information nessessary for logging the actions
     public ActionLog setup(Game game) {
+        return null;
+    }
+
+    public ActionLog firstNightSetupMode(Game game) {
         return null;
     }
 
