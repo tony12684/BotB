@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS games ( /* each played game */
   game_start_date_time datetime NOT NULL, /* yyyy-MM-ddTHH:mm:ss */
   game_end_date_time datetime, /* yyyy-MM-ddTHH:mm:ss */
   won_team_id int, /* **, the winning team */
-  FOREIGN KEY (team_id) REFERENCES teams(team_id)
+  FOREIGN KEY (won_team_id) REFERENCES teams(team_id)
 );
 
 CREATE TABLE IF NOT EXISTS user_games ( /* which users played in which games */
