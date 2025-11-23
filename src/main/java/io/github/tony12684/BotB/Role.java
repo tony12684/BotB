@@ -137,21 +137,10 @@ public class Role {
         return null;
     }
 
-    public ActionLog voteAction(Game game) {
-        // For when you place a vote on a nominee
-        return null;
-    }
-
-    public ActionLog falseVoteAction(Game game) {
-        // For drunk and poisoned players
-        return null;
-    }
-
     public ActionLog voteNominateAction(Game game) {
         // For when you nominate a player for execution
         return null;
     }
-
     public ActionLog falseVoteNominateAction(Game game) {
         // For drunk and poisoned players
         return null;
@@ -161,10 +150,63 @@ public class Role {
         // For when you are nominated for execution
         return null;
     }
-
     public ActionLog falseVoteNomineeAction(Game game) {
         // For drunk and poisoned players
         return null;
     }
 
+    public ActionLog voteAction(Game game) {
+        // For when you place a vote on a nominee
+        return null;
+    }
+    public ActionLog falseVoteAction(Game game) {
+        // For drunk and poisoned players
+        return null;
+    }
+
+    public ActionLog dawnAction(Game game) {
+        // For dawn triggers
+        return null;
+    }
+    public ActionLog falseDawnAction(Game game) {
+        // For drunk and poisoned players
+        return null;
+    }
+
+    public ActionLog duskAction(Game game) {
+        // For dusk triggers
+        return null;
+    }
+    public ActionLog falseDuskAction(Game game) {
+        // For drunk and poisoned players
+        return null;
+    }
+
+    public ActionLog executionAction(Game game) {
+        // For when you are executed
+        return null;
+    }
+    public ActionLog falseExecutionAction(Game game) {
+        // For drunk and poisoned players
+        return null;
+    }
+
+    public ActionLog nightDeathAction(Game game) {
+        // For when you die at night
+        return null;
+    }
+    public ActionLog falseNightDeathAction(Game game) {
+        // For drunk and poisoned players
+        return null;
+    }
+
+    public ActionLog dayDeathAction(Game game) {
+        // For when you die during the day
+        // I think no role uses this yet
+        return null;
+    }
+    public ActionLog falseDayDeathAction(Game game) {
+        // For drunk and poisoned players
+        return null;
+    }
 }
