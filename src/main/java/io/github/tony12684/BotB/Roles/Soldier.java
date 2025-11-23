@@ -1,4 +1,5 @@
 package io.github.tony12684.BotB.Roles;
+import io.github.tony12684.BotB.Performer;
 import io.github.tony12684.BotB.Role;
 
 /*
@@ -12,7 +13,7 @@ import io.github.tony12684.BotB.Role;
  */
 
 public class Soldier extends Role {
-    public Soldier() {
-        super("Soldier", Affiliation.TOWNSFOLK, Team.GOOD);
+    public Soldier(Performer performer) {
+        super(performer, "Soldier", Affiliation.TOWNSFOLK, Team.GOOD);
     }
 }

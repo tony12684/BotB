@@ -1,4 +1,5 @@
 package io.github.tony12684.BotB.Roles;
+import io.github.tony12684.BotB.Performer;
 import io.github.tony12684.BotB.Role;
 
 /*
@@ -10,7 +11,7 @@ import io.github.tony12684.BotB.Role;
  */
 
 public class Ravenkeeper extends Role {
-    public Ravenkeeper() {
-        super("Ravenkeeper", Affiliation.TOWNSFOLK, Team.GOOD);
+    public Ravenkeeper(Performer performer) {
+        super(performer, "Ravenkeeper", Affiliation.TOWNSFOLK, Team.GOOD);
     }
 }

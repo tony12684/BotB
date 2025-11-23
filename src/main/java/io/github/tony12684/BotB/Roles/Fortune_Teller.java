@@ -20,8 +20,8 @@ import io.github.tony12684.BotB.PlayerPerformer;
 
 public class Fortune_Teller extends Role {
     PlayerPerformer redHerring = null;
-    public Fortune_Teller() {
-        super("Fortune Teller", Affiliation.TOWNSFOLK, Team.GOOD);
+    public Fortune_Teller(Performer performer) {
+        super(performer, "Fortune Teller", Affiliation.TOWNSFOLK, Team.GOOD);
     }
 
     @Override

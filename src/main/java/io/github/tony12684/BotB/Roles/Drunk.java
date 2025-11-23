@@ -1,4 +1,5 @@
 package io.github.tony12684.BotB.Roles;
+import io.github.tony12684.BotB.Performer;
 import io.github.tony12684.BotB.Role;
 
 /*
@@ -11,8 +12,8 @@ import io.github.tony12684.BotB.Role;
  */
 
 public class Drunk extends Role {
-    public Drunk(Role falseRole) {
-        super("Drunk", Affiliation.OUTSIDER, Team.GOOD);
+    public Drunk(Performer performer, Role falseRole) {
+        super(performer, "Drunk", Affiliation.OUTSIDER, Team.GOOD);
         this.setFalseRole(falseRole);
     }
 }

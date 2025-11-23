@@ -3,6 +3,7 @@ import io.github.tony12684.BotB.PlayerPerformer;
 import io.github.tony12684.BotB.Role;
 import io.github.tony12684.BotB.ActionLog;
 import io.github.tony12684.BotB.Game;
+import io.github.tony12684.BotB.Performer;
 
 import java.util.List;
 
@@ -20,8 +21,8 @@ import java.util.List;
  //TODO implement action logging via SQL
 public class Chef extends Role {
     int evilPairsSetup = -1;
-    public Chef() {
-        super("Chef", Affiliation.TOWNSFOLK, Team.GOOD);
+    public Chef(Performer performer) {
+        super(performer, "Chef", Affiliation.TOWNSFOLK, Team.GOOD);
     }
     
     @Override

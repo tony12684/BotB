@@ -1,4 +1,5 @@
 package io.github.tony12684.BotB.Roles;
+import io.github.tony12684.BotB.Performer;
 import io.github.tony12684.BotB.Role;
 
 /*
@@ -9,7 +10,7 @@ import io.github.tony12684.BotB.Role;
 */
 
 public class Storyteller extends Role {
-    public Storyteller() {
-        super("Storyteller", Affiliation.STORYTELLER, Team.STORYTELLER);
+    public Storyteller(Performer performer) {
+        super(performer, "Storyteller", Affiliation.STORYTELLER, Team.STORYTELLER);
     }
 }

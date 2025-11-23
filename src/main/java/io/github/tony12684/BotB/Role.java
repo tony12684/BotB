@@ -1,6 +1,7 @@
 package io.github.tony12684.BotB;
 
 public class Role {
+    private Performer performer; // The performer (player) assigned to this role
     private String roleName; // Name of the role
     private Affiliation affiliation; // Townsfolk, Outsider, Minion, Demon, Traveler, etc.
     private Team team; // Good or Evil team
@@ -24,14 +25,16 @@ public class Role {
         STORYTELLER
     }
 
-    public Role(String roleName, Affiliation affiliation, Team team) {
+    public Role(Performer performer, String roleName, Affiliation affiliation, Team team) {
         // Constructor for Role class
+        this.performer = performer;
         this.roleName = roleName; // Role name requires matching spelling and spacing to role_ids.yaml to function properly with database queries
         this.affiliation = affiliation;
         this.team = team;
     }
-    public Role(String roleName, Affiliation affiliation, Team team, String startingMessage) {
+    public Role(Performer performer, String roleName, Affiliation affiliation, Team team, String startingMessage) {
         // Constructor for Role class with starting message
+        this.performer = performer;
         this.roleName = roleName;
         this.affiliation = affiliation;
         this.team = team;
@@ -112,8 +115,9 @@ public class Role {
         this.infoOverride = infoOverride;
     }
 
-    // TODO overhaul setup and action methods to return information nessessary for logging the actions
     public ActionLog setup(Game game) {
+        // intended to run many times per action
+        // take care to handle multiple calls correctly
         return null;
     }
 

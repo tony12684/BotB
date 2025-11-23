@@ -1,4 +1,5 @@
 package io.github.tony12684.BotB.Roles;
+import io.github.tony12684.BotB.Performer;
 import io.github.tony12684.BotB.Role;
 
 /*
@@ -10,7 +11,7 @@ import io.github.tony12684.BotB.Role;
  */
 
 public class Imp extends Role {
-    public Imp() {
-        super("Imp", Affiliation.DEMON, Team.EVIL);
+    public Imp(Performer performer) {
+        super(performer, "Imp", Affiliation.DEMON, Team.EVIL);
     }
 }

@@ -1,4 +1,5 @@
 package io.github.tony12684.BotB.Roles;
+import io.github.tony12684.BotB.Performer;
 import io.github.tony12684.BotB.Role;
 
 /*
@@ -12,7 +13,7 @@ import io.github.tony12684.BotB.Role;
  */
 
 public class Virgin extends Role {
-    public Virgin() {
-        super("Virgin", Affiliation.TOWNSFOLK, Team.GOOD);
+    public Virgin(Performer performer) {
+        super(performer, "Virgin", Affiliation.TOWNSFOLK, Team.GOOD);
     }
 }

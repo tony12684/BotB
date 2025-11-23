@@ -19,8 +19,8 @@ import java.util.List;
 public class Butler extends Role {
     private PlayerPerformer master = null;
 
-    public Butler() {
-        super("Butler", Affiliation.OUTSIDER, Team.GOOD);
+    public Butler(Performer performer) {
+        super(performer,"Butler", Affiliation.OUTSIDER, Team.GOOD);
     }
 
     @Override

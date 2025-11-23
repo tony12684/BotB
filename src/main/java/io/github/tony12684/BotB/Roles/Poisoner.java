@@ -1,4 +1,5 @@
 package io.github.tony12684.BotB.Roles;
+import io.github.tony12684.BotB.Performer;
 import io.github.tony12684.BotB.Role;
 
 /*
@@ -12,7 +13,7 @@ import io.github.tony12684.BotB.Role;
  */
 
 public class Poisoner extends Role {
-    public Poisoner() {
-        super("Poisoner", Affiliation.MINION, Team.EVIL);
+    public Poisoner(Performer performer) {
+        super(performer, "Poisoner", Affiliation.MINION, Team.EVIL);
     }
 }

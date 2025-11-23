@@ -1,5 +1,6 @@
 package io.github.tony12684.BotB.Roles;
 import io.github.tony12684.BotB.Grimoire;
+import io.github.tony12684.BotB.Performer;
 import io.github.tony12684.BotB.Role;
 
 /*
@@ -12,8 +13,8 @@ import io.github.tony12684.BotB.Role;
  */
 
 public class Recluse extends Role {
-    public Recluse() {
-        super("Recluse", Affiliation.OUTSIDER, Team.GOOD);
+    public Recluse(Performer performer) {
+        super(performer, "Recluse", Affiliation.OUTSIDER, Team.GOOD);
         this.setInfoOverride(true);
     }
     @Override

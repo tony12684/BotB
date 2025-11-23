@@ -1,4 +1,5 @@
 package io.github.tony12684.BotB.Roles;
+import io.github.tony12684.BotB.Performer;
 import io.github.tony12684.BotB.Role;
 
 /*
@@ -11,7 +12,7 @@ import io.github.tony12684.BotB.Role;
 */
 
 public class Scarlet_Woman extends Role {
-    public Scarlet_Woman() {
-        super("Scarlet Woman", Affiliation.MINION, Team.EVIL);
+    public Scarlet_Woman(Performer performer) {
+        super(performer, "Scarlet Woman", Affiliation.MINION, Team.EVIL);
     }
 }

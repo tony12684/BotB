@@ -8,8 +8,6 @@ import io.github.tony12684.BotB.PlayerPerformer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.entity.Player;
-
 /*
 * Empath - Townsfolk
 * "Each night, you learn how many of your 2 alive neighbors are evil."
@@ -21,8 +19,8 @@ import org.bukkit.entity.Player;
 public class Empath extends Role {
     int evilCountSetup = -1;
     List<PlayerPerformer> neighborsSetup = new ArrayList<>();
-    public Empath() {
-        super("Empath", Affiliation.TOWNSFOLK, Team.GOOD);
+    public Empath(Performer performer) {
+        super(performer, "Empath", Affiliation.TOWNSFOLK, Team.GOOD);
     } 
 
     @Override
@@ -102,9 +100,8 @@ public class Empath extends Role {
 
         return neighbors;
     }
-}
 
-private int countEvilPlayers(List<PlayerPerformer> players, Game game) {
+    private int countEvilPlayers(List<PlayerPerformer> players, Game game) {
         int evilCount = 0;
         for (PlayerPerformer player : players) {
             if (player.getRole().getTeam(
@@ -118,3 +115,4 @@ private int countEvilPlayers(List<PlayerPerformer> players, Game game) {
         }
         return evilCount;
     }
+}

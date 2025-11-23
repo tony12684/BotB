@@ -1,8 +1,18 @@
 quick parse the old datapack file structure for any other relevant notes
 
 TODO list
+    Fix player searching to handle multiple of same role
+    Make Roles responsible for killing themselves via execution or otherwise
+    Add action logging to night actions and setup
+    Add dusk and dawn triggers
+    Adjust night action priority sheet to be consistent existing practices
+        import and utilize night action priority
     adjust role_ids.yaml handling to accomidate new role additions.
         maybe just add in the travellers and fabled now??
+    Build current gamestate in grimoire by parsing all player and role data
+        reminder tokens and auto ability results will be missing.
+        find a way to catch, store, and present them while game is live
+    use achievement screen to build grimoire?
 
     update spigot
     fix world spawn angle

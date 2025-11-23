@@ -1,4 +1,5 @@
 package io.github.tony12684.BotB.Roles;
+import io.github.tony12684.BotB.Performer;
 import io.github.tony12684.BotB.Role;
 
 /*
@@ -10,7 +11,7 @@ import io.github.tony12684.BotB.Role;
 */
 
 public class Librarian extends Role {
-    public Librarian() {
-        super("Librarian", Affiliation.TOWNSFOLK, Team.GOOD);
+    public Librarian(Performer performer) {
+        super(performer, "Librarian", Affiliation.TOWNSFOLK, Team.GOOD);
     }
 }

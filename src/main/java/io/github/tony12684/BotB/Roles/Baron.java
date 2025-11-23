@@ -1,4 +1,5 @@
 package io.github.tony12684.BotB.Roles;
+import io.github.tony12684.BotB.Performer;
 import io.github.tony12684.BotB.Role;
 
 /*
@@ -12,7 +13,7 @@ import io.github.tony12684.BotB.Role;
 
 public class Baron extends Role {
     // Assumes external management of extra Outsiders
-    public Baron() {
-        super("Baron", Affiliation.MINION, Team.EVIL);
+    public Baron(Performer performer) {
+        super(performer, "Baron", Affiliation.MINION, Team.EVIL);
     }
 }
