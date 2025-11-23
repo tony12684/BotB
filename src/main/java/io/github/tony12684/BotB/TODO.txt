@@ -1,6 +1,7 @@
 quick parse the old datapack file structure for any other relevant notes
 
 TODO list
+    anticipate multiple affiliations for roles like legion
     Fix player searching to handle multiple of same role
     Make Roles responsible for killing themselves via execution or otherwise
     Add action logging to night actions and setup
