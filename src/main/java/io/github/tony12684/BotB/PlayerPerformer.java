@@ -1,5 +1,7 @@
 package io.github.tony12684.BotB;
 
+import java.util.UUID;
+
 public class PlayerPerformer extends Performer{
     private boolean drunk = false; // Indicates if the player is drunk
     private boolean poisoned = false; // Indicates if the player is poisoned
@@ -8,7 +10,7 @@ public class PlayerPerformer extends Performer{
     // Left neighbor is +1 seat, right neighbor is -1 seat by default
     private PlayerPerformer leftNeighbor = null; // Reference to the left neighbor
     private PlayerPerformer rightNeighbor = null; // Reference to the right neighbor
-    public PlayerPerformer(String uuid, Role role, String name) {
+    public PlayerPerformer(UUID uuid, Role role, String name) {
         // Constructor for PlayerPerformer class
         super(uuid, role, name);
     }

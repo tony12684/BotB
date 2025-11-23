@@ -1,8 +1,9 @@
 package io.github.tony12684.BotB;
 import java.util.List;
+import java.util.UUID;
 
 public class ActionLog {
-    private String performerUUID;
+    private UUID performerUUID;
     private String performerTeamName;
     private String performerRoleName;
     private String actionType;
@@ -23,7 +24,7 @@ public class ActionLog {
     }
 
 
-    public String getPerformerUUID() {
+    public UUID getPerformerUUID() {
         return performerUUID;
     }
 
