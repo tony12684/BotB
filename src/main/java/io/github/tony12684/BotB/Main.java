@@ -364,8 +364,8 @@ public class Main extends JavaPlugin implements Listener {
                 getLogger().severe("role_ids.yaml not found");
                 return false;
             }
-            Map<?,?> roles = yaml.loadAs(in, Map.class);
-            for (Map.Entry<?,?> entry : roles.entrySet()) {
+            Map<Integer, String> roles = yaml.loadAs(in, Map.class);
+            for (Map.Entry<Integer, String> entry : roles.entrySet()) {
                 String roleName = entry.getValue().toString();
                 try (Connection conn = getConn();
                      PreparedStatement stmt = conn.prepareStatement(

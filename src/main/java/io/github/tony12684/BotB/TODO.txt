@@ -3,17 +3,20 @@ quick parse the old datapack file structure for any other relevant notes
 TODO list
     hide saturation effect and give on player respawn
     modify regen effect to heal fully
-    Make Roles responsible for killing themselves via execution or otherwise
     Add action logging to night actions and setup
-    Add dusk and dawn triggers
-    Adjust night action priority sheet to be consistent existing practices
-        import and utilize night action priority
-    adjust role_ids.yaml handling to accomidate new role additions.
-        maybe just add in the travellers and fabled now??
+    add exile voting system for travelers nominated (check rulebook)
+    add all current roles to role_ids.yaml
     Build current gamestate in grimoire by parsing all player and role data
         reminder tokens and auto ability results will be missing.
         find a way to catch, store, and present them while game is live
+    apprentice role will override all night actions,
+        check if it hasn't acted yet,
+        ask the storyteller what role ability to give them,
+        recieves a new role construction from the grimoire,
+        assigns that roles performer to them,
+        then does that roles respective action
     use achievement screen to build grimoire?
+    build vote system overide mechanics for judge and voudon
 
     update spigot
     fix world spawn angle

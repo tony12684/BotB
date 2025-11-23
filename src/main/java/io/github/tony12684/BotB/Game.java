@@ -3,14 +3,17 @@ import io.github.tony12684.BotB.Role.Affiliation;
 import io.github.tony12684.BotB.Role.Team;
 import io.github.tony12684.BotB.Roles.Storyteller;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.yaml.snakeyaml.Yaml;
 
 import net.md_5.bungee.api.ChatColor;
 
@@ -62,9 +65,11 @@ public class Game {
         //TODO probably move all this to Game.startGame()
         assignSeats(players);
         
-        // linkNeighbors(players);
+        linkNeighbors(players);
+
 
         List<Role> roleList = grimoire.buildRoleList(this, players.size());
+        assignActionPriorityToRoles(roleList);
         assignRoles(players, roleList);
 
         setupPhase();
@@ -111,8 +116,7 @@ public class Game {
     }
 
     private void sortPlayersByActionPriority(List<PlayerPerformer> players) {
-        // Sort players based on their role's action priority for nighttime actions
-        //TODO implement this
+        players.sort((p1, p2) -> Integer.compare(p1.getRole().getActionPriority(), p2.getRole().getActionPriority()));
     }
 
     public List<PlayerPerformer> sortPlayersBySeatOrder(List<PlayerPerformer> players) {
@@ -156,6 +160,34 @@ public class Game {
             }
             currentPlayer.setRightNeighbor(rightNeighbor);
             currentPlayer.setLeftNeighbor(leftNeighbor);
+        }
+    }
+
+    private void assignActionPriorityToRoles(List<Role> roleList) {
+        // Assign action priority to each role in the role list
+        // get role action priority from actionPriority.yaml
+        Yaml yaml = new Yaml();
+        try (InputStream in = Main.class.getResourceAsStream("/actionPriority.yaml")) {
+            if (in == null) {
+                crashGame("actionPriority.yaml not found!", storyteller.getUUID());
+                return;
+            }
+            Map<Integer, String> actionPriorityMap = yaml.load(in);
+            for (Role role : roleList) {
+                for (Map.Entry<Integer, String> entry : actionPriorityMap.entrySet()) {
+                    if (entry.getValue().equals(role.getRoleNameActual())) {
+                        role.setActionPriority(entry.getKey());
+                        if (plugin.debugMode) {
+                            Bukkit.getLogger().info("Assigned action priority " + entry.getKey() + " to role " + role.getRoleNameActual());
+                        }
+                        break;
+                    }
+                }
+                // If role not found in actionPriority.yaml, assign default priority 0
+                role.setActionPriority(0);
+            }
+        } catch (Exception e) {
+            crashGame("Error loading actionPriority.yaml: " + e.getMessage(), storyteller.getUUID());
         }
     }
 
