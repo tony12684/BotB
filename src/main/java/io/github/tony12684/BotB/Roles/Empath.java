@@ -34,7 +34,7 @@ public class Empath extends Role {
     public ActionLog firstNightAction(Game game) {
         if (evilCountSetup != -1) {
             // only fires if empath isn't poisoned/drunk and already did setup
-            return new ActionLog(game.getPlayerByRole("Empath"), "empath", false, Integer.toString(evilCountSetup), new ArrayList<>(neighborsSetup));
+            return new ActionLog(this.getPerformer(), "empath", false, Integer.toString(evilCountSetup), new ArrayList<>(neighborsSetup));
         }
         return empathy(game);
     }
@@ -55,7 +55,7 @@ public class Empath extends Role {
     private ActionLog apathy(Game game) {
         // prompt storyteller to provide some number
         int evilCount = game.getGrimoire().getNumberFromPerformer(game.getStoryteller(), "Provide a number of evil neighbors to show the drunk/poisoned Empath.");
-        game.getGrimoire().basicMessage(game.getPlayerByRole("Empath"), "Your alive neighbors contain " + evilCount + " evil player(s).");
+        game.getGrimoire().basicMessage(this.getPerformer(), "Your alive neighbors contain " + evilCount + " evil player(s).");
         return new ActionLog(game.getStoryteller(), "empath", true, Integer.toString(evilCount), null);
     }
 
@@ -64,14 +64,14 @@ public class Empath extends Role {
         List<PlayerPerformer> neighbors = getLivingNeighbors(game);
         // count how many are evil
         int evilCount = countEvilPlayers(neighbors, game);
-        game.getGrimoire().basicMessage(game.getPlayerByRole("Empath"), "Your alive neighbors contain " + evilCount + " evil player(s).");
-        return new ActionLog(game.getPlayerByRole("Empath"), "empath", false, Integer.toString(evilCount), new ArrayList<>(neighbors));
+        game.getGrimoire().basicMessage(this.getPerformer(), "Your alive neighbors contain " + evilCount + " evil player(s).");
+        return new ActionLog(this.getPerformer(), "empath", false, Integer.toString(evilCount), new ArrayList<>(neighbors));
     }
 
     private List<PlayerPerformer> getLivingNeighbors(Game game) {
         // get the 2 living neighbors of the Empath player
         List<PlayerPerformer> neighbors = new ArrayList<PlayerPerformer>();
-        PlayerPerformer player = game.getPlayerByRole("Empath");
+        PlayerPerformer player = (PlayerPerformer) this.getPerformer();
         //find left neighbor
         while (true) {
             player = player.getLeftNeighbor();
@@ -85,7 +85,7 @@ public class Empath extends Role {
             }
         }
         //find right neighbor
-        player = game.getPlayerByRole("Empath");
+        player = (PlayerPerformer) this.getPerformer();
         while (true) {
             player = player.getRightNeighbor();
             if (player.getAlive()) {
@@ -106,7 +106,7 @@ public class Empath extends Role {
         for (PlayerPerformer player : players) {
             if (player.getRole().getTeam(
                 game.getGrimoire(),
-                game.getPlayerByRole("Empath").getName(),
+                this.getPerformer().getName(),
                 "Empath",
                 player.getName()).equals(Team.EVIL)) 
             {

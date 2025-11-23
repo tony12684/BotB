@@ -41,6 +41,10 @@ public class Role {
         this.startingMessage = startingMessage;
     }
 
+    public Performer getPerformer() {
+        return performer;
+    }
+
     public String getStartingMessage() {
         return startingMessage;
     }

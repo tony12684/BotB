@@ -33,20 +33,16 @@ public class Chef extends Role {
 
     @Override
     public ActionLog firstNightAction(Game game) {
-        PlayerPerformer chef = game.getPlayerByRole("Chef");
-        if (chef == null) {
-            throw new IllegalStateException("Chef player not found in game during first night action.");
-        }
         Integer evilPairs = countEvilPairs(game);
-        game.getGrimoire().basicMessage(chef, "There are " + evilPairs + " pairs of evil players sitting next to each other.");
-        return new ActionLog(chef, "chef", false, evilPairs.toString(), null);
+        game.getGrimoire().basicMessage(this.getPerformer(), "There are " + evilPairs + " pairs of evil players sitting next to each other.");
+        return new ActionLog(this.getPerformer(), "chef", false, evilPairs.toString(), null);
     }
 
     @Override
     public ActionLog falseFirstNightAction(Game game) {
         // prompt storyteller to provide some number
         int evilPairs = game.getGrimoire().getNumberFromPerformer(game.getStoryteller(), "Provide a number of evil pairs to show the drunk/poisoned Chef.");
-        game.getGrimoire().basicMessage(game.getPlayerByRole("Chef"), "There are " + evilPairs + " pairs of evil players sitting next to each other.");
+        game.getGrimoire().basicMessage(this.getPerformer(), "There are " + evilPairs + " pairs of evil players sitting next to each other.");
         return new ActionLog(game.getStoryteller(), "chef", true, Integer.toString(evilPairs), null);
     }
 
@@ -69,13 +65,13 @@ public class Chef extends Role {
                 // TODO fix this to work better with false team roles like recluse
                 if ((lastPlayer.getRole().getTeam(
                     game.getGrimoire(),
-                    game.getPlayerByRole("Chef").getName(),
+                    this.getPerformer().getName(),
                     "Chef",
                     lastPlayer.getName())
                     .equals(Team.EVIL))
                 && (player.getRole().getTeam(
                     game.getGrimoire(),
-                    game.getPlayerByRole("Chef").getName(),
+                    this.getPerformer().getName(),
                     "Chef",
                     player.getName())
                     .equals(Team.EVIL))) {
@@ -89,13 +85,13 @@ public class Chef extends Role {
         }
         if ((sortedPlayers.getFirst().getRole().getTeam(
             game.getGrimoire(),
-            game.getPlayerByRole("Chef").getName(),
+            this.getPerformer().getName(),
             "Chef",
             sortedPlayers.getFirst().getName())
             .equals(Team.EVIL))
         && (lastPlayer.getRole().getTeam(
             game.getGrimoire(),
-            game.getPlayerByRole("Chef").getName(),
+            this.getPerformer().getName(),
             "Chef",
             lastPlayer.getName())
             .equals(Team.EVIL))) {

@@ -53,7 +53,7 @@ public class Fortune_Teller extends Role {
     private ActionLog crystalBall(Game game) {
         // prompt FT for 2 targets
         List<PlayerPerformer> targets = game.getGrimoire().getFreeTargetsFromPerformer(
-            game.getPlayerByRole("Fortune Teller"),
+            this.getPerformer(),
             2,
             "Select 2 players to search for a Demon.");
         // wait for some time to obscure drunk/poisoned status
@@ -67,16 +67,16 @@ public class Fortune_Teller extends Role {
             if (target.getUUID().equals(redHerring.getUUID())
             || target.getRole().getAffiliation(
                 game.getGrimoire(),
-                game.getPlayerByRole("Fortune Teller").getName(),
+                this.getPerformer().getName(),
                 "Fortune Teller",
                 target.getName())
                 .equals(Affiliation.DEMON)) 
             {
                 game.getGrimoire().basicMessage(
-                    game.getPlayerByRole("Fortune Teller"),
+                    this.getPerformer(),
                     "You sense a Demon.");
                 return new ActionLog(
-                    game.getPlayerByRole("Fortune Teller"),
+                    this.getPerformer(),
                     "fortune_teller",
                     false,
                     Boolean.toString(true),
@@ -84,10 +84,10 @@ public class Fortune_Teller extends Role {
             }
         }
         game.getGrimoire().basicMessage(
-            game.getPlayerByRole("Fortune Teller"),
+            this.getPerformer(),
             "You do not sense a Demon.");
         return new ActionLog(
-            game.getPlayerByRole("Fortune Teller"),
+            this.getPerformer(),
             "fortune_teller",
             false,
             Boolean.toString(false),
@@ -106,7 +106,7 @@ public class Fortune_Teller extends Role {
     private ActionLog cloudyBall(Game game) {
         // prompt FT for 2 targets
         List<PlayerPerformer> targets = game.getGrimoire().getFreeTargetsFromPerformer(
-            game.getPlayerByRole("Fortune Teller"),
+            this.getPerformer(),
             2,
             "Select 2 players to search for a Demon.");
         // get result from storyteller
@@ -124,7 +124,7 @@ public class Fortune_Teller extends Role {
                 "You do not sense a Demon.");
         }
         return new ActionLog(
-            game.getPlayerByRole("Fortune Teller"),
+            this.getPerformer(),
             "fortune_teller",
             true,
             Boolean.toString(foundDemon),
