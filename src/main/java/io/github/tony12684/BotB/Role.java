@@ -66,8 +66,8 @@ public class Role {
         // game so that we can ask the storyteller if needed
         return affiliation;
     }
-    public void setAffiliation(Affiliation affiliation) {
-        this.affiliation = affiliation;
+    public void setAffiliation(Affiliation newAffiliation) {
+        this.affiliation = newAffiliation;
     }
 
     public Team getTeamActual() {
@@ -91,22 +91,22 @@ public class Role {
     public int getActionPriority() {
         return actionPriority;
     }
-    public void setActionPriority(int actionPriority) {
-        this.actionPriority = actionPriority;
+    public void setActionPriority(int newActionPriority) {
+        this.actionPriority = newActionPriority;
     }
 
     public Role getFalseRole() {
         return falseRole;
     }
-    public void setFalseRole(Role falseRole) {
-        this.falseRole = falseRole;
+    public void setFalseRole(Role newFalseRole) {
+        this.falseRole = newFalseRole;
     }
 
     public boolean getInfoOverride() {
         return infoOverride;
     }
-    public void setInfoOverride(boolean infoOverride) {
-        this.infoOverride = infoOverride;
+    public void setInfoOverride(boolean newInfoOverride) {
+        this.infoOverride = newInfoOverride;
     }
 
     public ActionLog setup(Game game) {
