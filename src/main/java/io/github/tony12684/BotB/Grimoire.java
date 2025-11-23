@@ -45,7 +45,7 @@ public class Grimoire {
         for (PlayerPerformer minion : minions) {
             Player player = Bukkit.getPlayer(minion.getUUID());
             if (player != null && player.isOnline()) {
-                StringBuilder info = new StringBuilder(ChatColor.DARK_RED + "Your fellow Minions are:\n");
+                StringBuilder info = new StringBuilder(ChatColor.GRAY + "Your fellow Minions are:\n");
                 for (PlayerPerformer fellowMinion : minions) {
                     if (!fellowMinion.getUUID().equals(minion.getUUID())) {
                         Player fellowPlayer = Bukkit.getPlayer(fellowMinion.getUUID());
@@ -68,7 +68,7 @@ public class Grimoire {
         //TODO upgrade this to use our UI when we find one
         Player player = Bukkit.getPlayer(trueDemon.getUUID());
         if (player != null && player.isOnline()) {
-            StringBuilder info = new StringBuilder(ChatColor.DARK_RED + "You are the Demon.\n");
+            StringBuilder info = new StringBuilder(ChatColor.GRAY + "You are the Demon.\n");
             if (!minions.isEmpty()) {
                 info.append("Your Minions are:\n");
                 for (PlayerPerformer minion : minions) {
