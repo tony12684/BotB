@@ -13,6 +13,8 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.entity.Player;
 
 import com.craftmend.openaudiomc.api.ClientApi;
@@ -36,7 +38,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class Main extends JavaPlugin implements Listener {
-    final boolean debugMode = true;
+    public final boolean debugMode = true;
     //these are private so that they only load from our files once
     private ChannelManager channelManager;
     private double voiceBlockDistance;
@@ -109,6 +111,7 @@ public class Main extends JavaPlugin implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         //triggered when a player joins the server
         if (debugMode) {getLogger().info("Player join event for : " + event.getPlayer().getDisplayName());}
+        event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, Integer.MAX_VALUE, 0, false, false, false));
         event.getPlayer().sendMessage(ChatColor.DARK_PURPLE + "Welcome to the Blocktower... ");
     }
 
@@ -150,10 +153,10 @@ public class Main extends JavaPlugin implements Listener {
     @EventHandler
     public void onEntityDamage(EntityDamageEvent event) {
         //triggers when an entity takes damage
-        //TODO fix so players health is full after damage
         if (event.getEntityType().toString().equals("PLAYER")) {
             Bukkit.getPlayer(event.getEntity().getUniqueId()).setHealth(20);
-            Bukkit.getPlayer(event.getEntity().getUniqueId()).setFoodLevel(20);
+            Bukkit.getPlayer(event.getEntity().getUniqueId()).addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 1, 255, false, false, false));
+            
         }
     }
     
@@ -421,6 +424,7 @@ public class Main extends JavaPlugin implements Listener {
         // Initialize a new game into the database
         try (Connection conn = getConn();
             PreparedStatement stmt = conn.prepareStatement("INSERT INTO games (game_start_date_time) VALUES (NOW())")) {
+            // TODO this is returning game id 1 every time
             int gameId = stmt.executeUpdate();
             return gameId;
         } catch (Exception e) {
@@ -458,7 +462,7 @@ public class Main extends JavaPlugin implements Listener {
                 PreparedStatement stmt = conn.prepareStatement(
                     "INSERT INTO user_game_roles (game_id, uuid, role_id, action_id) VALUES (?, ?, (SELECT role_id FROM roles WHERE role_name = ?), ?)")) {
                 stmt.setInt(1, gameId);
-                stmt.setString(2, performer.getUUID());
+                stmt.setString(2, performer.getUUID().toString());
                 stmt.setString(3, performer.getRole().getRoleNameActual().toLowerCase());
                 if (actionId == 0) {
                     stmt.setNull(4, java.sql.Types.INTEGER);
@@ -466,7 +470,7 @@ public class Main extends JavaPlugin implements Listener {
                     stmt.setInt(4, actionId);
                 }
                 int row = stmt.executeUpdate();
-                rows.put(performer.getUUID(), row);
+                rows.put(performer.getUUID().toString(), row);
 
             } catch (Exception e) {
                 throw new RuntimeException("Database insertion error in insertGameRoles(): " + e.getMessage());
@@ -484,10 +488,10 @@ public class Main extends JavaPlugin implements Listener {
                 PreparedStatement stmt = conn.prepareStatement(
                     "INSERT INTO user_game_teams (game_id, uuid, team_id) VALUES (?, ?, (SELECT team_id FROM teams WHERE team_name = ?))")) {
                 stmt.setInt(1, gameId);
-                stmt.setString(2, performer.getUUID());
+                stmt.setString(2, performer.getUUID().toString());
                 stmt.setString(3, performer.getRole().toString().toLowerCase());
                 int row = stmt.executeUpdate();
-                rows.put(performer.getUUID(), row);
+                rows.put(performer.getUUID().toString(), row);
 
             } catch (Exception e) {
                 throw new RuntimeException("Database insertion error in insertGameTeams(): " + e.getMessage());
@@ -502,7 +506,7 @@ public class Main extends JavaPlugin implements Listener {
             PreparedStatement stmt = conn.prepareStatement(
                 "INSERT INTO actions (game_id, uuid, team_id, role_id, action_day, action_type, action_contains_lie, action_has_targets, action_date_time, action_notes) VALUES (?, ?, (SELECT team_id FROM teams WHERE team_name = ?), (SELECT role_id FROM roles WHERE role_name = ?), ?, ?, ?, ?, (NOW()), ?)")) {
             stmt.setInt(1, gameId);
-            stmt.setString(2, performer.getUUID());
+            stmt.setString(2, performer.getUUID().toString());
             stmt.setString(3, performer.getRole().getTeamActual().toString().toLowerCase());
             stmt.setString(4, performer.getRole().getRoleNameActual().toLowerCase());
             stmt.setInt(5, actionDay);
