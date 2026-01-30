@@ -20,7 +20,7 @@ public class ServerSettingsInit {
 		Bukkit.setWhitelistEnforced(true);
 	}
 
-	public void initializeWorldSettings(String worldName) {
+	public void initializeWorldSettings(String worldName, boolean debugMode) {
 		World world = Bukkit.getWorld(worldName);
 		if (world == null) {
             Bukkit.getLogger().severe("World " + worldName + " not found! Game rules not set!");
@@ -28,8 +28,6 @@ public class ServerSettingsInit {
             return;
         }
 		//TODO load game rules from settings.yaml
-		//TODO remove the issue of players losing hunger
-		//TODO fix players dropping and picking up items
 		//TODO reasses these settings to not mess with other peoples worlds too much
 		world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, Boolean.FALSE);
 		world.setGameRule(GameRule.BLOCK_EXPLOSION_DROP_DECAY, Boolean.FALSE);
@@ -63,10 +61,13 @@ public class ServerSettingsInit {
 		world.setGameRule(GameRule.PLAYERS_SLEEPING_PERCENTAGE, 100);
 		world.setGameRule(GameRule.PROJECTILES_CAN_BREAK_BLOCKS, Boolean.FALSE);
 		world.setGameRule(GameRule.REDUCED_DEBUG_INFO, Boolean.TRUE);
-		world.setGameRule(GameRule.SEND_COMMAND_FEEDBACK, Boolean.TRUE);
+		if (debugMode) {
+			world.setGameRule(GameRule.SEND_COMMAND_FEEDBACK, Boolean.TRUE);
+		} else {
+			world.setGameRule(GameRule.SEND_COMMAND_FEEDBACK, Boolean.FALSE);
+		}
 		world.setGameRule(GameRule.SHOW_DEATH_MESSAGES, Boolean.TRUE);
 		world.setGameRule(GameRule.SNOW_ACCUMULATION_HEIGHT, 1);
-		world.setGameRule(GameRule.SPAWN_CHUNK_RADIUS, 5);
 		world.setGameRule(GameRule.SPAWN_RADIUS, 0);
 		world.setGameRule(GameRule.SPECTATORS_GENERATE_CHUNKS, Boolean.FALSE);
 		world.setGameRule(GameRule.TNT_EXPLODES, Boolean.FALSE);
