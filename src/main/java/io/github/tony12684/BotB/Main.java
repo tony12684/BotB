@@ -3,13 +3,16 @@ package io.github.tony12684.BotB;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import org.bukkit.*;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerCustomClickEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -23,6 +26,12 @@ import com.craftmend.openaudiomc.api.clients.Client;
 import com.craftmend.openaudiomc.api.VoiceApi;
 
 import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
+
+//import io.github.projectunified.unidialog.core.opener.DialogOpener;
+//import io.github.projectunified.unidialog.spigot.SpigotDialogManager;
+//import net.md_5.bungee.api.dialog.ConfirmationDialog;
+//import net.md_5.bungee.api.dialog.Dialog;
+//import net.md_5.bungee.api.dialog.DialogBase;
 
 import java.sql.SQLException;
 import java.sql.Connection;
@@ -39,10 +48,12 @@ import java.io.InputStream;
 
 public class Main extends JavaPlugin implements Listener {
     public final boolean debugMode = true;
+    private Game game;
     //these are private so that they only load from our files once
     private ChannelManager channelManager;
     private double voiceBlockDistance;
     private MysqlConnectionPoolDataSource dataSource;
+    //private SpigotDialogManager dialogManager;
 
     @Override
     public void onEnable() {
@@ -55,6 +66,10 @@ public class Main extends JavaPlugin implements Listener {
 
         //register commands
         this.getCommand("BOTBStartGame").setExecutor(new CommandBOTBStartGame());
+
+        //initialize dialog manager
+        //this.dialogManager = new SpigotDialogManager(this);
+        //dialogManager.register();
 
         //database initialization
         try {
@@ -74,7 +89,7 @@ public class Main extends JavaPlugin implements Listener {
         //load world name
         String worldName = loadFromSettings("worldName").toString();
         //init gamerules for world
-        serverSettings.initializeWorldSettings(worldName);
+        serverSettings.initializeWorldSettings(worldName, debugMode);
         //load voice block distance
         voiceBlockDistance = (double) loadFromSettings("voiceBlockDistance");
 
@@ -111,14 +126,52 @@ public class Main extends JavaPlugin implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         //triggered when a player joins the server
         if (debugMode) {getLogger().info("Player join event for : " + event.getPlayer().getDisplayName());}
-        event.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, Integer.MAX_VALUE, 0, false, false, false));
         event.getPlayer().sendMessage(ChatColor.DARK_PURPLE + "Welcome to the Blocktower... ");
     }
 
     @EventHandler
+    public void onPlayerDropItem(org.bukkit.event.player.PlayerDropItemEvent event) {
+        event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onCustomEvent(PlayerCustomClickEvent event) {
+        //triggered when a player interacts with a custom dialog
+        if (debugMode) {
+            event.getPlayer().sendMessage(ChatColor.RED + "Custom click event fired.");
+            event.getPlayer().sendMessage(ChatColor.RED + "Data: " + event.getData().toString());
+            event.getPlayer().sendMessage(ChatColor.RED + "ID: " + event.getId());
+        }
+        if (event.getId().toString().equals("minecraft:num_sub")) {
+            //process our number submission as json data
+            int number = event.getData().getAsJsonObject().get("num").getAsInt();
+            CompletableFuture<Integer> future = getGame().getGrimoire().getPendingNumResponses().remove(event.getPlayer().getUniqueId());
+            if (future != null) {
+                future.complete(number);
+            }
+        }
+    }
+
+    @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
+        event.getPlayer().setAbsorptionAmount(100.0);
+        event.getPlayer().setHealth(20.0);
+        event.getPlayer().setFoodLevel(100);
+        event.getPlayer().setSaturation(100);
         //triggers every time a players position changes?
         //TODO adjust this code to change voice channels'
+        /*
+        DialogOpener opener = dialogManager.createConfirmationDialog()
+            .title("Test")
+            .canCloseWithEscape(false)
+            .input("name", builder -> builder.textInput().label("Enter your name:"))
+            .yesAction(builder -> builder.label("Confirm"))
+            .noAction(builder -> builder.label("Cancel"))
+            .opener();
+        opener.open(event.getPlayer().getUniqueId());
+        */
+        //ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
+        //Bukkit.dispatchCommand(console, "dialog show " + event.getPlayer().getName() + " {type:\"minecraft:confirmation\",title:{text:\"Test\",type:\"text\",color:\"gray\"},inputs:[],can_close_with_escape:1,pause:0,after_action:\"close\",yes:{label:\"Yes please\",action:{type:\"minecraft:dynamic/custom\",id:\"test\",additions:{Num:2,SetupMode:0b,Team:\"GOOD\"}}},no:{label:\"No thanks\"}}");
         double offset = (double) voiceBlockDistance;
         Material from = event.getFrom().clone().subtract(0, offset, 0).getBlock().getType();
         Material to = event.getTo().clone().subtract(0, offset, 0).getBlock().getType();
@@ -168,6 +221,17 @@ public class Main extends JavaPlugin implements Listener {
             event.setCancelled(true);
             event.getPlayer().sendMessage(ChatColor.RED + "The whisper/tell command is disabled on this server.");
         }
+    }
+
+    public Game getGame() {
+        //return current game instance
+        //TODO handle no current game
+        return game;
+    }
+    public void setGame(Game game) {
+        //set current game instance
+        //TODO handle existing game
+        this.game = game;
     }
 
     private Object loadFromSettings(String key) {
