@@ -1,8 +1,11 @@
 quick parse the old datapack file structure for any other relevant notes
 
 TODO list
-    hide saturation effect and give on player respawn
-    modify regen effect to heal fully
+    reword actions to not give ability context
+        fortune teller should just get a result yes or no
+        and should pick 2 players without being told why
+    TODO check that dialog holdups in grimoire don't prevent main
+        from healing players and changing channels
     Add action logging to night actions and setup
     add exile voting system for travelers nominated (check rulebook)
     add all current roles to role_ids.yaml
