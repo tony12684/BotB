@@ -1,7 +1,7 @@
 name: BloodOnTheBlocktower
-version: 1.25.5-sp-alpha
+version: 1.25.10-sp-alpha
 main: io.github.tony12684.BotB.Main
-api-version: 1.21.5
+api-version: 1.21.10
 commands:
   BOTBStartGame:
     description: Starts a new game of Blood on the Blocktower
