@@ -1,20 +1,18 @@
 package io.github.tony12684.BotB;
-import io.github.tony12684.BotB.Role.Affiliation;
-import io.github.tony12684.BotB.Role.Team;
-import io.github.tony12684.BotB.Roles.Storyteller;
-
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.yaml.snakeyaml.Yaml;
 
+import io.github.tony12684.BotB.Role.Affiliation;
+import io.github.tony12684.BotB.Roles.Storyteller;
 import net.md_5.bungee.api.ChatColor;
 
 public class Game {
@@ -28,8 +26,12 @@ public class Game {
     private int gameId;
     
     public Game(Main plugin, UUID storytellerUUID, List<UUID> playerUUIDs) {
-        //Constructor for Game class
-        //Responsible for game setup sequencing
+        // Constructor for Game class
+        // Responsible for game setup sequencing
+        // Aysnchronous setup steps are chained between CompletableFutures
+        CompletableFuture<List<ActionLog>> chain = CompletableFuture.completedFuture(new ArrayList<>());
+
+        // Initial setup
         this.gameState = "setup";
         this.dayCount = 0;
         if (plugin.debugMode) {
@@ -37,47 +39,145 @@ public class Game {
             Bukkit.getLogger().info("gamestate set to 'setup'.");
             Bukkit.getLogger().info("dayCount set to 0.");
         }
+
+        // Set bidirectional link between Game and Main plugin
         this.plugin = plugin;
+        plugin.setGame(this);
+
+        // Log game start to database
         try {
             this.gameId = plugin.insertGameStart();
             Bukkit.getLogger().info("Game started with ID: " + gameId);
         } catch (Exception e) {
             crashGame("Database error on game start: " + e.getMessage(), storytellerUUID);
         }
+
+
         // TODO update this to accept fabled storytellers
         // TODO update this to accept storyteller nicknames
-        this.storyteller = new StorytellerPerformer(storytellerUUID, null, Bukkit.getPlayer(storytellerUUID).getName());
-        storyteller.setRole(new Storyteller(storyteller));
-        this.grimoire = new Grimoire(storyteller, this);
 
+        // Initialize storyteller performer async
+        chain = chain.thenCompose(logs -> {
+            if (plugin.debugMode) {Bukkit.getLogger().info("Initializing storyteller performer...");}
+            this.storyteller = new StorytellerPerformer(storytellerUUID, null, Bukkit.getPlayer(storytellerUUID).getName());
+            storyteller.setRole(new Storyteller(storyteller));
+            if (plugin.debugMode) {Bukkit.getLogger().info("Storyteller performer initialized for player: " + storyteller.getName());}
+            return CompletableFuture.completedFuture(logs);
+        });
+
+        // Initialize grimoire
+        chain = chain.thenApply(logs -> {
+            if (plugin.debugMode) {Bukkit.getLogger().info("Initializing grimoire...");}
+            this.grimoire = new Grimoire(storyteller, this);
+            if (plugin.debugMode) {Bukkit.getLogger().info("Grimoire initialized.");}
+            return logs;
+        });
 
         // Build players list
-        this.players = new ArrayList<>();
-        for (UUID uuid : playerUUIDs) {
-            players.add(new PlayerPerformer(uuid, null, Bukkit.getPlayer(uuid).getName())); // Role to be assigned later
-            if (plugin.debugMode) {
-                Bukkit.getLogger().info("Added player to game: " + Bukkit.getPlayer(uuid).getName());
+        chain = chain.thenApply(logs -> {
+            if (plugin.debugMode) {Bukkit.getLogger().info("Building players list...");}
+            this.players = new ArrayList<>();
+            for (UUID uuid : playerUUIDs) {
+                players.add(new PlayerPerformer(uuid, null, Bukkit.getPlayer(uuid).getName()));
+                if (plugin.debugMode) {Bukkit.getLogger().info("Added player to game: " + Bukkit.getPlayer(uuid).getName());}
             }
-            // TODO adjust for nickname plugin support
-        }
-        // TODO log players to game_users
+            if (plugin.debugMode) {Bukkit.getLogger().info("Players list built with " + players.size() + " players.");}
+            return logs;
+        });
 
-        //TODO probably move all this to Game.startGame()
-        assignSeats(players);
+        // Assign seats
+        chain = chain.thenApply(logs -> {
+            if (plugin.debugMode) {Bukkit.getLogger().info("Assigning seats...");}
+            assignSeats(players);
+            if (plugin.debugMode) {Bukkit.getLogger().info("Seats assigned.");}
+            return logs;
+        });
         
-        linkNeighbors(players);
+        // Link neighbors
+        chain = chain.thenApply(logs -> {
+            if (plugin.debugMode) {Bukkit.getLogger().info("Linking neighbors...");}
+            linkNeighbors(players);
+            if (plugin.debugMode) {Bukkit.getLogger().info("Neighbors linked.");}
+            return logs;
+        });
+        
+        // Build script async
+        chain = chain.thenCompose(logs -> {
+            if (plugin.debugMode) {Bukkit.getLogger().info("Building script...");}
+            return grimoire.buildScript(this, players.size())
+                .thenApply(roleList -> {
+                    if (plugin.debugMode) {Bukkit.getLogger().info("Script built with " + roleList.size() + " roles.");}
+                    return logs;
+                });
+        });
 
+        // Build subScript async
+        chain = chain.thenCompose(logs -> {
+            if (plugin.debugMode) {Bukkit.getLogger().info("Building subScript...");}
+            return grimoire.buildSubScript(this, players.size())
+                .thenApply(roleList -> {
+                    if (plugin.debugMode) {Bukkit.getLogger().info("SubScript built with " + roleList.size() + " roles.");}
 
-        List<Role> roleList = grimoire.buildRoleList(this, players.size());
-        assignActionPriorityToRoles(roleList);
-        assignRoles(players, roleList);
+                    // Assign action priorities to roles
+                    if (plugin.debugMode) {Bukkit.getLogger().info("Assigning action priorities to roles...");}
+                    assignActionPriorityToRoles(roleList);
+                    if (plugin.debugMode) {Bukkit.getLogger().info("Action priorities assigned.");}
+                    
+                    // Assign roles to players
+                    if (plugin.debugMode) {Bukkit.getLogger().info("Assigning roles to players...");}
+                    assignRoles(players, roleList);
+                    if (plugin.debugMode) {Bukkit.getLogger().info("Roles assigned.");}
+                    return logs;
+                });
+        });
+        
+        // Retrieve setup parameters async
+        chain = chain.thenCompose(logs -> {
+            if (plugin.debugMode) {Bukkit.getLogger().info("Retrieving setup parameters from storyteller...");}
+            return grimoire.getSetupParameters()
+                .thenApply(setupParams -> {
+                    if (plugin.debugMode) {
+                        if (setupParams) {
+                            Bukkit.getLogger().info("Get Setup Parameters Succeeded");
+                        } else {
+                            Bukkit.getLogger().info("Get Setup Parameters Failed");
+                        }
+                    }
+                    return logs;
+                });
+        });
 
-        setupPhase();
-
-        firstNight(); // Proceed to the first night phase
-        //TODO build daytime, voting and subsequent night phases loop
-        //TODO build drunk false role handling into Game class action logic
-
+        // Setup phase async
+        chain = chain.thenCompose(logs -> {
+            Bukkit.getLogger().info("Running setup phase...");
+            return setupPhase()
+                .thenApply(setupLogs -> {
+                    logs.addAll(setupLogs);
+                    Bukkit.getLogger().info("Setup phase complete.");
+                    return logs;
+                });
+        });
+        
+        // First night async
+        chain = chain.thenCompose(logs -> {
+            Bukkit.getLogger().info("Starting first night...");
+            return firstNight()
+                .thenApply(firstNightLogs -> {
+                    logs.addAll(firstNightLogs);
+                    Bukkit.getLogger().info("First night complete.");
+                    return logs;
+                });
+        });
+        
+        // Final step: Game ready
+        chain.thenAccept(allLogs -> {
+            Bukkit.getLogger().info("Game setup complete! Total action logs: " + allLogs.size());
+            // TODO process aquired action logs
+            // Game is now ready to play
+        }).exceptionally(e -> {
+            crashGame("Error during async game setup: " + e.getMessage(), storytellerUUID);
+            return null;
+        });
     }
 
     public List<PlayerPerformer> getPlayers() {
@@ -135,7 +235,6 @@ public class Game {
             }
         } // Unless players list is shuffled, order should match seat number.
         //TODO validate with storyteller
-        //TODO manual seat assignment option
     }
 
     private void linkNeighbors(List<PlayerPerformer> players) {
@@ -183,8 +282,6 @@ public class Game {
                         break;
                     }
                 }
-                // If role not found in actionPriority.yaml, assign default priority 0
-                role.setActionPriority(0);
             }
         } catch (Exception e) {
             crashGame("Error loading actionPriority.yaml: " + e.getMessage(), storyteller.getUUID());
@@ -206,15 +303,22 @@ public class Game {
             }
         }
         if (!roleList.isEmpty()) {crashGame("Unassigned roles remain!", storyteller.getUUID());}
-        // TODO validate with storyteller
     }
 
-    private void setupPhase() {
-        // perform all setup()'s in roles
-        List<ActionLog> setupLogs = this.grimoire.setupLoop(this);
-        // if storyteller wants to do first night setup mode, do that now
-        if (this.grimoire.getFirstNightSetupMode()) {
-            List<ActionLog> firstNightSetupLogs = this.grimoire.firstNightSetupLoop(this);
+    private CompletableFuture<List<ActionLog>> setupPhase() {
+        // Perform the setup phase of the game asynchronously
+        if (grimoire.getFirstNightSetupMode()) {
+            if (plugin.debugMode) {Bukkit.getLogger().info("Performing first night setup loop.");}
+            return grimoire.firstNightSetupLoop(this).thenApply(result -> {
+                if (plugin.debugMode) {Bukkit.getLogger().info("First night setup loop complete.");}
+                return result;
+            });
+        } else {
+            if (plugin.debugMode) {Bukkit.getLogger().info("Performing standard setup loop.");}
+            return grimoire.setupLoop(this).thenApply(result -> {
+                if (plugin.debugMode) {Bukkit.getLogger().info("Standard setup loop complete.");}
+                return result;
+            });
         }
     }
 
@@ -242,7 +346,7 @@ public class Game {
         List<PlayerPerformer> demons = new ArrayList<>();
         for (PlayerPerformer player : players) {
             if (player.getRole().getFalseRole() != null) {
-                // Contiginency to add "drunk demons" though they don't yet exist
+                // Contiginency to add "drunk demons" (like lunatic) though they don't yet exist
                 if (player.getRole().getFalseRole().getAffiliationActual().equals(Affiliation.DEMON)) {
                     demons.add(player);
                 }
@@ -264,18 +368,16 @@ public class Game {
         return false;
     }
 
-    private void firstNight() {
-        // Handle the first night phase of the game
-        this.gameState = "night";
-        this.dayCount = 1;
-        if (plugin.debugMode) {
-            Bukkit.getLogger().info("First night phase started.");
-            Bukkit.getLogger().info("gamestate set to 'night'.");
-            Bukkit.getLogger().info("dayCount set to 1.");
-        }
+    private void firstNightNotifications() {
+        // Notify players of their roles and relevant information on the first night
+        
+        // notify players of their roles
         notifyPlayersOfRoles();
+
+        // get the lists of minions and demons
         List<PlayerPerformer> minions = getAllMinions(players);
         List<PlayerPerformer> demons = getDemons(players);
+
         // notify minions of each other and true demon
         for (PlayerPerformer demon : demons) {
             // ignore lunatic among demons for minion info
@@ -285,7 +387,11 @@ public class Game {
                 grimoire.minionInfo(minions, demon);
             }
         }
+
+        // get bluff roles async
         List<Role> bluffs = grimoire.getBluffRoles();
+
+        // notify demons of minions and bluff roles
         for (PlayerPerformer demon : demons) {
             // check for false demon
             if (demon.getRole().getFalseRole() != null) {
@@ -305,35 +411,84 @@ public class Game {
                 grimoire.demonInfo(demon, null, minions, bluffs);
             }
         }
-        // TODO add storyteller to action list to accomidate fabled roles
-        sortPlayersByActionPriority(players);
-        for (PlayerPerformer player : players) {
-            if (player.getRole().getFalseRole() != null) {
-                // for false role players do their false roles false first night action
-                try {
-                    player.getRole().getFalseRole().falseFirstNightAction(this);
-                } catch (Exception e) {
-                    // Catch any exceptions thrown during the false first night action
-                    crashGame("Error during false first night action for player " + player.getUUID() + ": " + e.getMessage(), storyteller.getUUID());
-                }
-            } else if (player.getDrunk() || player.getPoisoned()) {
-                // for drunk or poisoned players do their false first night action
-                try {
-                    player.getRole().falseFirstNightAction(this);
-                } catch (Exception e) {
-                    // Catch any exceptions thrown during the false first night action
-                    crashGame("Error during false first night action for player " + player.getUUID() + ": " + e.getMessage(), storyteller.getUUID());
-                }
-            } else {
-                // for normal players do their normal first night action
-                try {
-                    player.getRole().firstNightAction(this);
-                } catch (Exception e) {
-                    // Catch any exceptions thrown during the first night action
-                    crashGame("Error during first night action for player " + player.getUUID() + ": " + e.getMessage(), storyteller.getUUID());
-                }
+    }
+
+    private CompletableFuture<List<ActionLog>> firstNight() {
+        // Handles the first night phase of the game
+        CompletableFuture<List<ActionLog>> chain = CompletableFuture.completedFuture(new ArrayList<>());
+
+        // set gamestate to night and dayCount to 1
+        chain = chain.thenApply(logs -> {
+            this.gameState = "night";
+            this.dayCount = 1;
+            if (plugin.debugMode) {
+                Bukkit.getLogger().info("Starting first night phase...");
+                Bukkit.getLogger().info("gamestate set to 'night'.");
+                Bukkit.getLogger().info("dayCount set to 1.");
             }
+            return logs;
+        });
+
+        // notify players of their roles and relevant info
+        chain = chain.thenApply(logs -> {
+            if (plugin.debugMode) {Bukkit.getLogger().info("Sending first night notifications to players...");}
+            firstNightNotifications();
+            if (plugin.debugMode) {Bukkit.getLogger().info("First night notifications sent.");}
+            return logs;
+        });
+
+        // sort players by action priority
+        chain = chain.thenApply(logs -> {
+            if (plugin.debugMode) {Bukkit.getLogger().info("Sorting players by action priority...");}
+            sortPlayersByActionPriority(players);
+            if (plugin.debugMode) {Bukkit.getLogger().info("Players sorted by action priority.");}
+            return logs;
+        });
+
+        // Chain all player actions sequentially
+        for (PlayerPerformer player : players) {
+            chain = chain.thenCompose(logs -> {
+                if (plugin.debugMode) {
+                    Bukkit.getLogger().info("Processing first night action for player: " + player.getName());
+                }
+
+                CompletableFuture<List<ActionLog>> playerActionFuture;
+                
+                try {
+                    // determine which first night action to perform
+                    if (player.getRole().getFalseRole() != null) {
+                        // for false role players do their false roles false first night action
+                        playerActionFuture = player.getRole().getFalseRole().falseFirstNightAction(this);
+                    } else if (player.getDrunk() || player.getPoisoned()) {
+                        // for drunk or poisoned players do their false first night action
+                        playerActionFuture = player.getRole().falseFirstNightAction(this);
+                    } else {
+                        // for normal players do their normal first night action
+                        playerActionFuture = player.getRole().firstNightAction(this);
+                    }
+                    
+                    return playerActionFuture.thenApply(actionLogs -> {
+                        logs.addAll(actionLogs);
+                        if (plugin.debugMode) {
+                            Bukkit.getLogger().info("Completed first night action for player: " + player.getName());
+                        }
+                        return logs;
+                    });
+                    
+                } catch (Exception e) {
+                    crashGame("Error during first night action for player " + player.getUUID() + ": " + e.getMessage(), storyteller.getUUID());
+                    return CompletableFuture.completedFuture(logs);
+                }
+            });
         }
+        
+        // Final logging step
+        chain = chain.thenApply(logs -> {
+            if (plugin.debugMode) {Bukkit.getLogger().info("First night actions complete.");}
+            return logs;
+        });
+
+        return chain;
     }
 
     

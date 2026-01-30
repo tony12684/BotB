@@ -41,9 +41,11 @@ public class Chef extends Role {
     @Override
     public ActionLog falseFirstNightAction(Game game) {
         // prompt storyteller to provide some number
-        int evilPairs = game.getGrimoire().getNumberFromPerformer(game.getStoryteller(), "Provide a number of evil pairs to show the drunk/poisoned Chef.");
-        game.getGrimoire().basicMessage(this.getPerformer(), "There are " + evilPairs + " pairs of evil players sitting next to each other.");
-        return new ActionLog(game.getStoryteller(), "chef", true, Integer.toString(evilPairs), null);
+        // TODO refactor to use new async number input method
+        return null;
+        //int evilPairs = game.getGrimoire().getNumberFromPerformer(game.getStoryteller(), "Provide a number of evil pairs to show the drunk/poisoned Chef.");
+        //game.getGrimoire().basicMessage(this.getPerformer(), "There are " + evilPairs + " pairs of evil players sitting next to each other.");
+        //return new ActionLog(game.getStoryteller(), "chef", true, Integer.toString(evilPairs), null);
     }
 
     private Integer countEvilPairs(Game game) {
@@ -58,7 +60,9 @@ public class Chef extends Role {
         List<PlayerPerformer> sortedPlayers = game.getPlayers();
         sortedPlayers = game.sortPlayersBySeatOrder(sortedPlayers);
         if (game.getInfoOverrideInGame(sortedPlayers)) { // if recluse or similar is in game, ask storyteller
-            return game.getGrimoire().getNumberFromPerformer(game.getStoryteller(), "How many evil pairs does the Chef see? \nConsider roles such as Recluse that may affect this count.");
+            // TODO refactor to use new async number input method
+            //return game.getGrimoire().getNumberFromPerformer(game.getStoryteller(), "How many evil pairs does the Chef see? \nConsider roles such as Recluse that may affect this count.");
+            return 0;
         } // TODO improve this so that storyteller is only prompted when necessary
         for (PlayerPerformer player : sortedPlayers) {
             if (lastPlayer != null) {

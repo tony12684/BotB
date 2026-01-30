@@ -54,9 +54,11 @@ public class Empath extends Role {
 
     private ActionLog apathy(Game game) {
         // prompt storyteller to provide some number
-        int evilCount = game.getGrimoire().getNumberFromPerformer(game.getStoryteller(), "Provide a number of evil neighbors to show the drunk/poisoned Empath.");
-        game.getGrimoire().basicMessage(this.getPerformer(), "Your alive neighbors contain " + evilCount + " evil player(s).");
-        return new ActionLog(game.getStoryteller(), "empath", true, Integer.toString(evilCount), null);
+        // TODO refactor to use new async number input method
+        return null;
+        //int evilCount = game.getGrimoire().getNumberFromPerformer(game.getStoryteller(), "Provide a number of evil neighbors to show the drunk/poisoned Empath.");
+        //game.getGrimoire().basicMessage(this.getPerformer(), "Your alive neighbors contain " + evilCount + " evil player(s).");
+        //return new ActionLog(game.getStoryteller(), "empath", true, Integer.toString(evilCount), null);
     }
 
     private ActionLog empathy(Game game) {

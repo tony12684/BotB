@@ -1,12 +1,15 @@
 package io.github.tony12684.BotB;
 
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
 public class Role {
     private Performer performer; // The performer (player) assigned to this role
     private String roleName; // Name of the role
     private Affiliation affiliation; // Townsfolk, Outsider, Minion, Demon, Traveler, etc.
     private Team team; // Good or Evil team
     private String startingMessage = "Have fun!"; // Message sent to player when assigned this role
-    private int actionPriority; // Priority of the role's action during the night phase (lower number = higher priority)
+    private int actionPriority = 0; // Priority of the role's action during the night phase (lower number = higher priority)
     private Role falseRole; // A false role to display to the player instead of their actual role
     private boolean infoOverride = false; // Whether the role has an info override for actions like recluse
 
@@ -109,104 +112,129 @@ public class Role {
         this.infoOverride = newInfoOverride;
     }
 
-    public ActionLog setup(Game game) {
+    public CompletableFuture<List<ActionLog>> setup(Game game) {
         // intended to run many times per action
         // take care to handle multiple calls correctly
-        return null;
+        CompletableFuture<List<ActionLog>> future = new CompletableFuture<>();
+        return future;
     }
 
-    public ActionLog firstNightSetupMode(Game game) {
-        return null;
+    public CompletableFuture<List<ActionLog>> firstNightSetup(Game game) {
+        // for setup of first night actions
+        CompletableFuture<List<ActionLog>> future = new CompletableFuture<>();
+        return future;
     }
 
-    public ActionLog firstNightAction(Game game) {
-        return null;
+    public CompletableFuture<List<ActionLog>> firstNightAction(Game game) {
+        // For first night actions
+        CompletableFuture<List<ActionLog>> future = new CompletableFuture<>();
+        return future;
     }
 
-    public ActionLog falseFirstNightAction(Game game) {
+    public CompletableFuture<List<ActionLog>> falseFirstNightAction(Game game) {
         // For drunk and poisoned players
-        return null;
+        CompletableFuture<List<ActionLog>> future = new CompletableFuture<>();
+        return future;
     }
 
-    public ActionLog otherNightAction(Game game){
-        return null;
+    public CompletableFuture<List<ActionLog>> otherNightAction(Game game){
+        // For regular night actions
+        CompletableFuture<List<ActionLog>> future = new CompletableFuture<>();
+        return future;
     }
 
-    public ActionLog falseOtherNightAction(Game game) {
+    public CompletableFuture<List<ActionLog>> falseOtherNightAction(Game game) {
         // For drunk and poisoned players
-        return null;
+        CompletableFuture<List<ActionLog>> future = new CompletableFuture<>();
+        return future;
     }
 
-    public ActionLog voteNominateAction(Game game) {
+    public CompletableFuture<List<ActionLog>> voteNominateAction(Game game) {
         // For when you nominate a player for execution
-        return null;
+        CompletableFuture<List<ActionLog>> future = new CompletableFuture<>();
+        return future;
     }
-    public ActionLog falseVoteNominateAction(Game game) {
+    public CompletableFuture<List<ActionLog>> falseVoteNominateAction(Game game) {
         // For drunk and poisoned players
-        return null;
+        CompletableFuture<List<ActionLog>> future = new CompletableFuture<>();
+        return future;
     }
 
-    public ActionLog voteNomineeAction(Game game) {
+    public CompletableFuture<List<ActionLog>> voteNomineeAction(Game game) {
         // For when you are nominated for execution
-        return null;
+        CompletableFuture<List<ActionLog>> future = new CompletableFuture<>();
+        return future;
     }
-    public ActionLog falseVoteNomineeAction(Game game) {
+    public CompletableFuture<List<ActionLog>> falseVoteNomineeAction(Game game) {
         // For drunk and poisoned players
-        return null;
+        CompletableFuture<List<ActionLog>> future = new CompletableFuture<>();
+        return future;
     }
 
-    public ActionLog voteAction(Game game) {
+    public CompletableFuture<List<ActionLog>> voteAction(Game game) {
         // For when you place a vote on a nominee
-        return null;
+        CompletableFuture<List<ActionLog>> future = new CompletableFuture<>();
+        return future;
     }
-    public ActionLog falseVoteAction(Game game) {
+    public CompletableFuture<List<ActionLog>> falseVoteAction(Game game) {
         // For drunk and poisoned players
-        return null;
+        CompletableFuture<List<ActionLog>> future = new CompletableFuture<>();
+        return future;
     }
 
-    public ActionLog dawnAction(Game game) {
+    public CompletableFuture<List<ActionLog>> dawnAction(Game game) {
         // For dawn triggers
-        return null;
+        CompletableFuture<List<ActionLog>> future = new CompletableFuture<>();
+        return future;
     }
-    public ActionLog falseDawnAction(Game game) {
+    public CompletableFuture<List<ActionLog>> falseDawnAction(Game game) {
         // For drunk and poisoned players
-        return null;
+        CompletableFuture<List<ActionLog>> future = new CompletableFuture<>();
+        return future;
     }
 
-    public ActionLog duskAction(Game game) {
+    public CompletableFuture<List<ActionLog>> duskAction(Game game) {
         // For dusk triggers
-        return null;
+        CompletableFuture<List<ActionLog>> future = new CompletableFuture<>();
+        return future;
     }
-    public ActionLog falseDuskAction(Game game) {
+    public CompletableFuture<List<ActionLog>> falseDuskAction(Game game) {
         // For drunk and poisoned players
-        return null;
+        CompletableFuture<List<ActionLog>> future = new CompletableFuture<>();
+        return future;
     }
 
-    public ActionLog executionAction(Game game) {
+    public CompletableFuture<List<ActionLog>> executionAction(Game game) {
         // For when you are executed
-        return null;
+        CompletableFuture<List<ActionLog>> future = new CompletableFuture<>();
+        return future;
     }
-    public ActionLog falseExecutionAction(Game game) {
+    public CompletableFuture<List<ActionLog>> falseExecutionAction(Game game) {
         // For drunk and poisoned players
-        return null;
+        CompletableFuture<List<ActionLog>> future = new CompletableFuture<>();
+        return future;
     }
 
-    public ActionLog nightDeathAction(Game game) {
+    public CompletableFuture<List<ActionLog>> nightDeathAction(Game game) {
         // For when you die at night
-        return null;
+        CompletableFuture<List<ActionLog>> future = new CompletableFuture<>();
+        return future;
     }
-    public ActionLog falseNightDeathAction(Game game) {
+    public CompletableFuture<List<ActionLog>> falseNightDeathAction(Game game) {
         // For drunk and poisoned players
-        return null;
+        CompletableFuture<List<ActionLog>> future = new CompletableFuture<>();
+        return future;
     }
 
-    public ActionLog dayDeathAction(Game game) {
+    public CompletableFuture<List<ActionLog>> dayDeathAction(Game game) {
         // For when you die during the day
         // I think no role uses this yet
-        return null;
+        CompletableFuture<List<ActionLog>> future = new CompletableFuture<>();
+        return future;
     }
-    public ActionLog falseDayDeathAction(Game game) {
+    public CompletableFuture<List<ActionLog>> falseDayDeathAction(Game game) {
         // For drunk and poisoned players
-        return null;
+        CompletableFuture<List<ActionLog>> future = new CompletableFuture<>();
+        return future;
     }
 }
