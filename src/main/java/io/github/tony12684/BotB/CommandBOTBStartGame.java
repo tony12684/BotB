@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
 public class CommandBOTBStartGame implements CommandExecutor{
@@ -22,6 +23,13 @@ public class CommandBOTBStartGame implements CommandExecutor{
             sender.sendMessage("Only players can start a game.");
             return false;
         }
+        ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
+        // de op everyone
+        Bukkit.dispatchCommand(console, "deop @a");
+        // op storyteller
+        Bukkit.dispatchCommand(console, "op " + storyteller.getName());
+
+        
         // Start a new game with the specified storyteller UUID
         List<UUID> playerUUIDs = new java.util.ArrayList<>();
         for (Player p : org.bukkit.Bukkit.getOnlinePlayers()) {
@@ -33,9 +41,10 @@ public class CommandBOTBStartGame implements CommandExecutor{
         Bukkit.getLogger().info("Removing storyteller UUID: " + storytellerUUID);
         Bukkit.getPlayer(storytellerUUID).sendMessage("Storyteller UUID: " + storytellerUUID);
         playerUUIDs.remove(storytellerUUID); //remove storyteller from player list
-        // get instance of Main plugin
         sender.sendMessage("Game starting with you as the storyteller!");
+        // get instance of Main plugin
         Main plugin = Main.getPlugin(Main.class);
+        // start the game
         new Game(plugin, storytellerUUID, playerUUIDs);
         return true;
     }
