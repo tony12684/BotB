@@ -46,6 +46,14 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * The main class for the BotB plugin.
+ * This class is responsible for initializing and managing the plugin's core functionality,
+ * including event handling, command registration, and database interactions.
+ * 
+ * @author Tony12684
+*/
+
 public class Main extends JavaPlugin implements Listener {
     public final boolean debugMode = true;
     private Game game;
@@ -55,9 +63,13 @@ public class Main extends JavaPlugin implements Listener {
     private MysqlConnectionPoolDataSource dataSource;
     //private SpigotDialogManager dialogManager;
 
+
+    /**
+     * Runs when the plugin is enabled on the server.
+     * Registers commands, initializes the database, initializes server settings, and sets up event listeners.
+     */
     @Override
     public void onEnable() {
-        //triggered when the plugin is enabled
         //TODO prevent players from creating their own voice channels
         getLogger().info("BotB plugin enabled.");
         if (debugMode) {
@@ -99,68 +111,122 @@ public class Main extends JavaPlugin implements Listener {
         //registers event handlers so they can fire
         //uses this for listener because this implements listener
         //uses this as plugin because this is a plugin
+        // TODO: move event listeners to a separate class for cleaner code.
         getServer().getPluginManager().registerEvents(this, this);
     }
 
+
+    /**
+     * Runs when the plugin is disabled, through server close or otherwise.
+     * This method is responsible for cleaning up resources, saving data, and performing any necessary shutdown tasks.
+     */
     @Override
     public void onDisable() {
-        //triggered when the plugin is disabled
+        // TODO: add saving of game information on plugin disable.
+        //   to resume the game on server crash
         if (debugMode) { getLogger().info("onDisable is called!"); }
         getLogger().info("BotB plugin disabled.");
     }
 
+    /**
+     * Returns the instance of the main plugin class.
+     * This method can be used to access the plugin instance from other classes.
+     * 
+     * @return this instance of the Main class
+     */
     public Main getInstance() {
+        // tbh I don't remember why this exists. Seems pointless.
         return this;
     }
 
+    /**
+     * Handles player chat events asynchronously.
+     * This method is triggered when a player sends a chat message.
+     * It can be used to implement custom chat behavior, such as restricting messages to certain players or logging messages.
+     * 
+     * @param event The AsyncPlayerChatEvent that triggered this method.
+     */
     @EventHandler
     public void asyncPlayerChat(AsyncPlayerChatEvent event) {
-        //triggered when a player sends a chat message
         // TODO: make it so that players who are in a voice chat only message those people
         // TODO: wiretap all player messages to storyteller?
 
         //if (debugMode) {getLogger().info("Async player chat event for : " + event.getPlayer().getDisplayName());}
     }
 
+
+    /**
+     * Handles player join events.
+     * This method is triggered when a player joins the server.
+     * It can be used to implement custom join behavior, such as sending welcome messages or initializing player data.
+     * 
+     * @param event The PlayerJoinEvent that triggered this method.
+     */
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        //triggered when a player joins the server
         if (debugMode) {getLogger().info("Player join event for : " + event.getPlayer().getDisplayName());}
+        // custom join message
         event.getPlayer().sendMessage(ChatColor.DARK_PURPLE + "Welcome to the Blocktower... ");
     }
 
+    /**
+     * Handles player drop item events.
+     * This method is triggered when a player attempts to drop an item.
+     * It can be used to prevent players from dropping items or to implement custom drop behavior.
+     * 
+     * @param event The PlayerDropItemEvent that triggered this method.
+     */
     @EventHandler
     public void onPlayerDropItem(org.bukkit.event.player.PlayerDropItemEvent event) {
+        // prevents item dropping
         event.setCancelled(true);
     }
 
+    /**
+     * Handles custom player click events.
+     * This method is triggered when a player interacts with a custom dialog.
+     * It can be used to implement custom behavior based on the player's interaction with the dialog.
+     * 
+     * @param event The PlayerCustomClickEvent that triggered this method.
+     */
     @EventHandler
     public void onCustomEvent(PlayerCustomClickEvent event) {
-        //triggered when a player interacts with a custom dialog
-        if (debugMode) {
+        if (debugMode) { // get sender info
             event.getPlayer().sendMessage(ChatColor.RED + "Custom click event fired.");
             event.getPlayer().sendMessage(ChatColor.RED + "Data: " + event.getData().toString());
             event.getPlayer().sendMessage(ChatColor.RED + "ID: " + event.getId());
         }
+        // parse data for custom number submissions
         if (event.getId().toString().equals("minecraft:num_sub")) {
-            //process our number submission as json data
+            //process our number submission from json data
             int number = event.getData().getAsJsonObject().get("num").getAsInt();
+            // aquire pending future registered to the player dialog we just recieved
             CompletableFuture<Integer> future = getGame().getGrimoire().getPendingNumResponses().remove(event.getPlayer().getUniqueId());
             if (future != null) {
+                // if that future is still active complete it with the number we got
                 future.complete(number);
             }
         }
     }
 
+
+    /**
+     * Handles player move events.
+     * This method is triggered when a player moves.
+     * It can be used to implement custom behavior based on the player's movement, such as updating health or changing voice channels.
+     * 
+     * @param event The PlayerMoveEvent that triggered this method.
+     */
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
+        // TODO: move this to a persistent timer to handle afk players
+        // keep players healthy and fed
         event.getPlayer().setAbsorptionAmount(100.0);
         event.getPlayer().setHealth(20.0);
         event.getPlayer().setFoodLevel(100);
         event.getPlayer().setSaturation(100);
-        //triggers every time a players position changes?
         //TODO adjust this code to change voice channels'
-        /*
+        /* TEST DIALOG
         DialogOpener opener = dialogManager.createConfirmationDialog()
             .title("Test")
             .canCloseWithEscape(false)
@@ -172,86 +238,128 @@ public class Main extends JavaPlugin implements Listener {
         */
         //ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
         //Bukkit.dispatchCommand(console, "dialog show " + event.getPlayer().getName() + " {type:\"minecraft:confirmation\",title:{text:\"Test\",type:\"text\",color:\"gray\"},inputs:[],can_close_with_escape:1,pause:0,after_action:\"close\",yes:{label:\"Yes please\",action:{type:\"minecraft:dynamic/custom\",id:\"test\",additions:{Num:2,SetupMode:0b,Team:\"GOOD\"}}},no:{label:\"No thanks\"}}");
+        
+        // requires a game version in which the material list is consitent and NON-LEGACY
+        // I know it's jank but it's like this so that people can make their own maps
+        //  and place their own voice blocks to manage channels
+        // get the programmed distance required to trigger a voice block
         double offset = (double) voiceBlockDistance;
+        // get the block type we came from and went to
         Material from = event.getFrom().clone().subtract(0, offset, 0).getBlock().getType();
         Material to = event.getTo().clone().subtract(0, offset, 0).getBlock().getType();
         if (from != to ) { //the block material we need to check has changed
+            // get the list of voice blocks
             Map<String, String> channelChangers = channelManager.getAllChannels();
+            // for each possible voice block
             for (Map.Entry<String, String> entry : channelChangers.entrySet()) {
+                // get the key and translate it into a Material
+                //  IF VOICE BLOCK KEYS ARE NOT CONSISTENT WITH MATERIAL NAMES THIS WILL FAIL
                 String channelBlockType = entry.getKey();
                 Material channelMaterial = Material.getMaterial(channelBlockType);
+                // get the channel that voice block is registered to
                 String channelTarget = entry.getValue();
-                //only legacy materials are being used and found.
-                if (channelMaterial == null) {
+                if (channelMaterial == null) { // if the voice block material was parsed incorrectly
+                    // warn the server console
                     getLogger().warning("Invalid material in channelChangers.yaml for key: " + channelBlockType);
                     getLogger().warning("Check channelChangers.yaml to ensure correct material names.");
-                
                 } else if (channelTarget.equals("disconnect") && to == channelMaterial) {
-                    // Player has moved into a block that disconnects them from voice
-                    Player player = event.getPlayer();
+                    // Player has moved into a voice block that disconnects them from voice
+                    Player player = event.getPlayer(); // get the player that triggered the event
+                    // get the channel they were previously in based on the block they were last on
                     channelTarget = channelChangers.get(from.toString());
-                    if (channelTarget != null) { // only disconnect if we know what channel they are in
+                    if (channelTarget != null) {
+                        // if target is null we were probably walking INTO a house so don't disconnect
                         changeChannel(channelTarget, player, true);
                     }
-                } else if (to == channelMaterial) {
-                    // This is guranteed to fire if the disconnect check fires and fails
-                    // Player has moved into a block that changes their voice channel
-                    Player player = event.getPlayer();
-                    changeChannel(channelTarget, player,false);
+                } else if (to == channelMaterial) {// Player has moved into a block that changes their voice channel
+                    Player player = event.getPlayer(); // get the player that triggered the event
+                    changeChannel(channelTarget, player,false); // change the player's voice channel
                 }
             }
         }
     }
 
+
+    /**
+     * Handles entity damage events.
+     * This method is triggered when an entity takes damage.
+     * 
+     * @param event The EntityDamageEvent that triggered this method.
+     */
     @EventHandler
     public void onEntityDamage(EntityDamageEvent event) {
-        //triggers when an entity takes damage
-        if (event.getEntityType().toString().equals("PLAYER")) {
+        if (event.getEntityType().toString().equals("PLAYER")) { // if a player took damage
+            // heal them back up
             Bukkit.getPlayer(event.getEntity().getUniqueId()).setHealth(20);
             Bukkit.getPlayer(event.getEntity().getUniqueId()).addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 1, 255, false, false, false));
-            
+            // do not cancel the damage, if you do you cancel the knockback and that's no fun.
         }
     }
     
+    /**
+     * Handles player command preprocess events.
+     * This method is triggered when a player enters a command.
+     * 
+     * @param event The PlayerCommandPreprocessEvent that triggered this method.
+     */
     @EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
-        //triggers when a player enters a command
         //TODO enable whispers sent specifically to storyteller
+        // if the player was sending a private message
         if (event.getMessage().toLowerCase().startsWith("/w ") || event.getMessage().toLowerCase().startsWith("/tell")) {
-            event.setCancelled(true);
+            event.setCancelled(true); // cancel the message
+            // and tell them they can't do that
             event.getPlayer().sendMessage(ChatColor.RED + "The whisper/tell command is disabled on this server.");
         }
     }
 
+    /**
+     * Returns the current game instance.
+     * 
+     * @return The current game instance.
+     */
     public Game getGame() {
-        //return current game instance
         //TODO handle no current game
         return game;
     }
+    /**
+     * Sets the current game instance.
+     * 
+     * @param game The game instance to set.
+     */
     public void setGame(Game game) {
         //set current game instance
         //TODO handle existing game
         this.game = game;
     }
 
+    /**
+     * Loads a value from the settings.yaml file.
+     * 
+     * @param key The key to look up in the settings.yaml file.
+     * @return The value associated with the key, or a default value if not found.
+     */
     private Object loadFromSettings(String key) {
-        //load yaml configuration for settings
-        //ensure that any settings not found are handled with defaults
+        // TODO: pull data one time and hold it?
         getLogger().info("Loading '" + key + "' from settings.yaml");
+        // ensure that any settings not found are handled with defaults
         String defaultWorldName = "world";
         double defaultVoiceBlockDistance = -1.0;
+        // get input stream from file
         try (InputStream in = Main.class.getResourceAsStream("/settings.yaml")) {
-            if (in != null) {
+            if (in != null) {// if the file exists
+                // create a yaml object and pull the data from the input stream
                 Yaml yaml = new Yaml();
                 Object data = yaml.load(in);
-                if (data instanceof java.util.Map) {
+                if (data instanceof java.util.Map) { // if all that worked
+                    // return the value associated with the key in the map
                     return ((java.util.Map<?,?>)data).get(key);
                 }
             }
         } catch (Exception e) {
             getLogger().warning("Could not load '" + key + "' from settings.yaml: " + e.getMessage());
         }
-        //handle defaults
+        //handle default returns if key lookup failed
         if (key.equals("worldName")) {
             getLogger().info("Using default world name: " + defaultWorldName);
             return defaultWorldName;
@@ -263,13 +371,21 @@ public class Main extends JavaPlugin implements Listener {
         return null;
     }
 
+    /**
+     * Initializes the MySQL data source.
+     * DataSource
+     * 
+     * @return The initialized MySQL data source.
+     * @throws SQLException If an error occurs while initializing the data source.
+     */
     private MysqlConnectionPoolDataSource initMySQLDataSource() throws SQLException {
 
         // this will only successfully create the Yaml if you build the constructor with LoaderOptions
-        // i do not know why
+        //  i do not know why
 
         // load yaml configuration for DB connection
         LoaderOptions options = new LoaderOptions();
+        // TODO: place the config into .gitignore
         Yaml yaml = new Yaml(new Constructor(Config.class, options));
         try (InputStream in = Main.class.getResourceAsStream("/connectionData.yaml")) {
             Config config = yaml.load(in);

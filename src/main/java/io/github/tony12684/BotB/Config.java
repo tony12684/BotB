@@ -1,6 +1,7 @@
 package io.github.tony12684.BotB;
 
 public class Config {
+    // TODO: merge config and database into one private file that is hidden from git
     private String url;
     private int port;
     private String username;
