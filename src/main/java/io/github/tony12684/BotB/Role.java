@@ -23,6 +23,7 @@ public class Role {
     }
 
     public enum Team {
+        // Ensure this matches Main.initTeamsInDB() teams table.
         GOOD,
         EVIL,
         STORYTELLER

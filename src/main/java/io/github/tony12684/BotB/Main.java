@@ -85,13 +85,13 @@ public class Main extends JavaPlugin implements Listener {
 
         //database initialization
         try {
-        dataSource = initMySQLDataSource();
-        initDatabase();
-        initRolesInDB();
-        initTeamsInDB();
+            dataSource = initMySQLDataSource();
+            initDatabase();
+            initRolesInDB();
+            initTeamsInDB();
         } catch (Exception e) {
             getLogger().severe("Failed to initialize Database");
-        }
+        }// TODO: warn storyteller about failed data logging
 
         //server initialization
         ServerSettingsInit serverSettings = new ServerSettingsInit();
@@ -375,7 +375,7 @@ public class Main extends JavaPlugin implements Listener {
      * Initializes the MySQL data source.
      * DataSource
      * 
-     * @return The initialized MySQL data source.
+     * @return The initialized MySQL data source. null if init failed.
      * @throws SQLException If an error occurs while initializing the data source.
      */
     private MysqlConnectionPoolDataSource initMySQLDataSource() throws SQLException {
@@ -393,30 +393,37 @@ public class Main extends JavaPlugin implements Listener {
             getLogger().info("Database Port: " + config.getPort());
             getLogger().info("Database Username: " + config.getUsername());
 
-            //pull database info from config
-            //TODO streamline config database object interaction
+            // pull database info from config
+            // TODO streamline config database object interaction
             Database database = config.getDatabase();
             MysqlConnectionPoolDataSource dataSource = new MysqlConnectionPoolDataSource();
+            // set database parameters
             dataSource.setServerName(database.getHost());
             dataSource.setPortNumber(database.getPort());
             dataSource.setDatabaseName(database.getDatabase());
             dataSource.setUser(database.getUser());
             dataSource.setPassword(database.getPassword());
-            //dataSource.set
-            //test it and send it back out
+            // dataSource.set
+            // test the datasource connection
             testDataSource(dataSource);
             getLogger().info("MySQL DataSource initialized successfully.");
+            // send it out
             return dataSource;
         } catch (Exception e) {
             getLogger().severe("Failed to load configuration: " + e.getMessage());
         }
-        //TODO replace with an thrown exception
         return null;
     }
 
+    /**
+     * Tests the provided data source by attempting to establish a connection.
+     *
+     * @param dataSource The data source to test.
+     * @throws SQLException If the connection is invalid or cannot be established.
+     */
     private void testDataSource(DataSource dataSource) throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
-            if (!conn.isValid(1)) {
+            if (!conn.isValid(2)) { // try for 2 seconds to get connection
                 throw new SQLException("Could not establish database connection.");
             }
             else {
@@ -425,45 +432,58 @@ public class Main extends JavaPlugin implements Listener {
         }
     }
 
+    /**
+     * Alias of getConnection()
+     * 
+     * @return A connection from the data source.
+     * @throws SQLException If a connection cannot be established.
+     */
     private Connection getConn() throws SQLException {
         return dataSource.getConnection();
     }
 
+    /**
+     * Changes the voice channel of a player.
+     *
+     * @param channelTarget The target voice channel name. Need to match an existing voice channel name in ChannelChangers.yaml
+     * @param player The player whose channel is to be changed.
+     * @param leaveCurrent Whether the player should leave the current channel. Should be true whenever they are already in a voice channel.
+     */
     private void changeChannel(String channelTarget, Player player, boolean leaveCurrent) {
-        //channelTarget should match a valid voice channel name
-        //if disconnecting channel target is the current voice channel
+        // get the voice API client of the player
         Client client = ClientApi.getInstance().getClient(player.getUniqueId());
+        // get the target voice channel
         VoiceChannel channel = VoiceApi.getInstance().getChannel(channelTarget);
-        //when walking over a channel changer block invalid material is being logged
-        //  for every single block in channelChangers.yaml
         if (debugMode && !leaveCurrent) {getLogger().info("Attempting to connect player " + player.getName() + " to channel " + channelTarget);}
         if (debugMode && leaveCurrent) {getLogger().info("Attempting to disconnect player " + player.getName() + " from channel " + channelTarget);}
-        if (client == null) {
+        if (client == null) {// no voice client was found
             getLogger().warning("Client not found for player: " + player.getName());
-            return;
-        } else if (client.isConnected() == false) {
+        } else if (client.isConnected() == false) {// voice client not connected
             getLogger().warning("Client is not connected for player: " + player.getName());
-            return;
-        } else if (leaveCurrent) {
+        } else if (leaveCurrent) {// disconnect the players voice
             if (debugMode) {getLogger().info("Disconnecting " + player.getName() + " from voice.");}
             channel.removeMember(client);
-        } else if (channel == null){
+        } else if (channel == null){// voice channel not found
             getLogger().warning("Voice channel not found: " + channelTarget);
-            return;
-        } else {
+        } else {// voice channel found and client is connected so join
             if (debugMode) {getLogger().info("Moved player " + player.getName() + " to channel " + channelTarget);}
             channel.addMember(client);
         }
     }
 
+    /**
+     * Sets the in server conditions to night conditions required for the game.
+     */
     /*
     public void nightTime() {
-        //set time to night in the main world
+        // load world from settings
         String worldName = loadFromSettings("worldName").toString();
         World world = Bukkit.getWorld(worldName);
         if (world != null) {
             world.setTime(16500); // Set time to night
             Collection<?> playerList = Bukkit.getOnlinePlayers();
+            // hide all players from each other
+            // TODO: exclude storyteller from this
             for (Object i : playerList) {
                 for (Object j : playerList) {
                     if (i instanceof Player && j instanceof Player) {
@@ -479,7 +499,10 @@ public class Main extends JavaPlugin implements Listener {
     }
     */
 
-    /*
+    /**
+     * Sets the in server conditions to day conditions required for the game
+     */
+    /* TODO: merge dayTime and Nighttime to remove redundant code, pass time as parameter
     public void dayTime() {
         //set time to day in the main world
         String worldName = loadFromSettings("worldName").toString();
@@ -502,10 +525,15 @@ public class Main extends JavaPlugin implements Listener {
     }
     */
 
+    /**
+     * Initializes the database by creating necessary tables if they do not exist.
+     * 
+     * @throws SQLException if a database access error or sql error occurs
+     * @throws IOException if an I/O error occurs while reading the database setup file
+     */
     private boolean initDatabase() throws SQLException, IOException{
-        //build database tables if they do not exist
-        //TODO implement database table building
         String setup;
+        // load sql from the file
         try (InputStream in = getClassLoader().getResourceAsStream("BOTB_database_setup.sql")) {
             if (in != null) {
                 setup = new String(in.readAllBytes());
@@ -517,7 +545,9 @@ public class Main extends JavaPlugin implements Listener {
             getLogger().severe("Error reading database setup SQL file: " + e.getMessage());
             throw e;
         }
+        // split up each query
         String[] queries = setup.split(";");
+        // execute each query
         for (String query : queries) {
             String trimmedQuery = query.trim();
             if (!trimmedQuery.isEmpty()) {
@@ -535,25 +565,33 @@ public class Main extends JavaPlugin implements Listener {
         return true;
     }
 
+    /**
+     * Initializes the roles in the database by loading them from role_ids.yaml file.
+     * 
+     * @return true if roles were successfully initialized, false otherwise
+     */
     public boolean initRolesInDB() {
-        //load roles from yaml and insert them into the database
-        // rebuild if role list changes?
+        // load in the role ids from role_ids.yaml
+        //  when updating role_ids ONLY append else your database will become wrong
         Yaml yaml = new Yaml();
         try (InputStream in = Main.class.getResourceAsStream("/role_ids.yaml")) {
             if (in == null) {
                 getLogger().severe("role_ids.yaml not found");
                 return false;
             }
+            // map out the ids to the names
             Map<Integer, String> roles = yaml.loadAs(in, Map.class);
             for (Map.Entry<Integer, String> entry : roles.entrySet()) {
                 String roleName = entry.getValue().toString();
                 try (Connection conn = getConn();
-                     PreparedStatement stmt = conn.prepareStatement(
-                         "INSERT INTO roles (role_name) VALUES (?) ON DUPLICATE KEY UPDATE role_name = role_name")) {
+                    // update such that the resulting table will match role_ids.yaml
+                    //  if table has been modified to be inconsistent this will overide
+                    PreparedStatement stmt = conn.prepareStatement(
+                        "INSERT INTO roles (role_name) VALUES (?) ON DUPLICATE KEY UPDATE role_name = role_name")) {
                     stmt.setString(1, roleName);
                     stmt.executeUpdate();
                 } catch (SQLException e) {
-                    //TODO validate table and rebuild if needed
+                    // should only run if roles doesn't exist or database init failed.
                     getLogger().severe("Database insertion error for role: " + roleName);
                     getLogger().severe("Error details: " + e.getMessage());
                     return false;
@@ -566,14 +604,21 @@ public class Main extends JavaPlugin implements Listener {
         return true;
     }
 
+    /**
+     * Initializes the teams in the database.
+     * 
+     * @return true if teams were successfully initialized, false otherwise
+     */
     public boolean initTeamsInDB() {
-        //put team names into teams reference table
-        // Ensure team names match Affiliation enum names
+        // IF A NEW TEAM IS ADDED ENSURE IT'S APPENDED to the teams array
+        // Ensure team names match Role.Team Enums
+        //  Team Enum uses uppercase and database uses lowercase
         String[] teams = {"good", "evil", "storyteller"};
         for (String teamName : teams) {
             try (Connection conn = getConn();
-                 PreparedStatement stmt = conn.prepareStatement(
-                     "INSERT INTO teams (team_name) VALUES (?) ON DUPLICATE KEY UPDATE team_name = team_name")) {
+                // insert each name into DATABASE
+                PreparedStatement stmt = conn.prepareStatement(
+                    "INSERT INTO teams (team_name) VALUES (?) ON DUPLICATE KEY UPDATE team_name = team_name")) {
                 stmt.setString(1, teamName);
                 stmt.executeUpdate();
             } catch (Exception e) {
@@ -584,9 +629,17 @@ public class Main extends JavaPlugin implements Listener {
         return true;
     }
 
+    /**
+     * Inserts a new user into the database.
+     *
+     * @param playerUUID The UUID of the player.
+     * @param playerName The name of the player.
+     * @return The number of rows affected.
+     */
     public int insertUser(String playerUUID, String playerName) {
-        // Insert a new user into the database
-        // TODO fire this code on user join
+        // TODO: update this to utilize nicknames when implemented
+        // TODO: add update nickname method for changed nicknames
+        // TODO: fire this code on user join
         try (Connection conn = getConn();
             PreparedStatement stmt = conn.prepareStatement(
                 //if the user already exists, do not insert again. uuid = uuid means do nothing
@@ -600,9 +653,14 @@ public class Main extends JavaPlugin implements Listener {
         }
     }
 
+    /**
+     * Inserts a new game start into the database.
+     *
+     * @return The ID of the newly inserted game.
+     */
     public int insertGameStart() {
-        // Initialize a new game into the database
         try (Connection conn = getConn();
+            // insert the current time as a new game entry
             PreparedStatement stmt = conn.prepareStatement("INSERT INTO games (game_start_date_time) VALUES (NOW())")) {
             // TODO this is returning game id 1 every time
             int gameId = stmt.executeUpdate();
@@ -612,19 +670,26 @@ public class Main extends JavaPlugin implements Listener {
         }
     }
 
+    /**
+     * Inserts users into a game in the database. One entry per user per game.
+     *
+     * @param gameId The ID of the game.
+     * @param playerUUIDs The list of player UUIDs.
+     * @return A map of player UUIDs to the number of rows affected.
+     */
     public Map<String, Integer> insertGameUsers(int gameId, List<String> playerUUIDs) {
-        // Insert all users in a game into the user_games table for that game
-        // One entry per user per game
+        // TODO: call method for users joining the game late
+        // build a map for the return
         Map<String, Integer> rows = new HashMap<String,Integer>();
         for (String playerUUID : playerUUIDs) {
             try (Connection conn = getConn();
+                // insert the entry
                 PreparedStatement stmt = conn.prepareStatement(
                     "INSERT INTO user_games (game_id, uuid) VALUES (?, ?)")) {
                 stmt.setInt(1, gameId);
                 stmt.setString(2, playerUUID);
                 int row = stmt.executeUpdate();
                 rows.put(playerUUID, row);
-
             } catch (Exception e) {
                 throw new RuntimeException("Database insertion error in insertGameUsers(): " + e.getMessage());
             }
@@ -632,6 +697,12 @@ public class Main extends JavaPlugin implements Listener {
         return rows;
     }
 
+    /**
+     * Inserts user roles into a game in the database. One entry per user per game.
+     * 
+     * @param gameId The ID of the game from the games table.
+     * @param playerPerformers The list of PlayerPerformers containing the users and their assigned roles for the game.
+     */
     public Map<String, Integer> insertGameRoles(int gameId, List<PlayerPerformer> playerPerformers, int actionId) {
         // Insert all user roles in a game into the user_game_roles table for that game
         // One entry per user per game

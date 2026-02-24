@@ -50,7 +50,7 @@ public class Game {
             Bukkit.getLogger().info("Game started with ID: " + gameId);
         } catch (Exception e) {
             crashGame("Database error on game start: " + e.getMessage(), storytellerUUID);
-        }
+        } // TODO: insert game users
 
 
         // TODO update this to accept fabled storytellers
